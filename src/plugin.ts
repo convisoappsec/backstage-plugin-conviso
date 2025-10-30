@@ -16,7 +16,7 @@ export const BackstagePluginConvisoPage = backstagePluginConvisoPlugin.provide(
   createRoutableExtension({
     name: 'BackstagePluginConvisoPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/ConvisoPlatformConfig').then(m => m.ConvisoPlatformConfig),
     mountPoint: rootRouteRef,
   }),
 );

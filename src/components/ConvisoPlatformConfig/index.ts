@@ -1,0 +1,3 @@
+export { ConvisoPlatformConfig } from './ConvisoPlatformConfig';
+
+
