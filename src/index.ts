@@ -1,1 +1,1 @@
-export { backstagePluginConvisoPlugin, BackstagePluginConvisoPage } from './plugin';
+export { BackstagePluginConvisoPage, backstagePluginConvisoPlugin } from './plugin';

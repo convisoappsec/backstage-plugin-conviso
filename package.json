@@ -17,6 +17,16 @@
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./backend": {
+      "types": "./src/backend/index.ts",
+      "default": "./src/backend/index.ts"
+    }
+  },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.esm.js",
@@ -52,11 +62,13 @@
     "@mui/lab": "^5.0.0-alpha.150",
     "@mui/material": "^5.14.0",
     "axios": "^1.6.0",
+    "express": "^4.18.2",
     "formik": "^2.4.0",
     "react-use": "^17.4.0",
     "yup": "^1.3.0"
   },
   "peerDependencies": {
+    "@backstage/backend-plugin-api": "^1.4.4",
     "react": "^16.13.1 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {

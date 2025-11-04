@@ -1,5 +1,4 @@
 import {
-  configApiRef,
   createApiFactory,
   createPlugin,
   createRoutableExtension,
@@ -20,13 +19,11 @@ export const backstagePluginConvisoPlugin = createPlugin({
       api: convisoPlatformApiRef,
       deps: {
         discoveryApi: discoveryApiRef,
-        configApi: configApiRef,
         fetchApi: fetchApiRef,
       },
-      factory: ({ discoveryApi, configApi, fetchApi }) =>
+      factory: ({ discoveryApi, fetchApi }) =>
         new ConvisoPlatformApiClient({
           discoveryApi,
-          configApi,
           fetchApi,
         }),
     }),

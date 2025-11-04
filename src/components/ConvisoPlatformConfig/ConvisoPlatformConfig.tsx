@@ -1,8 +1,9 @@
 import { Content, ContentHeader, Header, HeaderLabel, InfoCard, Page, Progress, WarningPanel } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
-import { Button, Grid, TextField, Typography } from '@material-ui/core';
-import { useMemo, useState } from 'react';
+import { Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { useEffect, useMemo, useState } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
+import { ProjectSelector } from '../ProjectSelector';
 
 function generateInstanceId(): string {
   return `backstage-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -10,11 +11,13 @@ function generateInstanceId(): string {
 
 export const ConvisoPlatformConfig = () => {
   const api = useApi(convisoPlatformApiRef);
-  const [companyId, setCompanyId] = useState<string>('');
+  
+  const [loadingIntegration, setLoadingIntegration] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
-  const [integrationId, setIntegrationId] = useState<string | null>(null);
+  const [integration, setIntegration] = useState<{ id: string; backstageUrl: string; instanceId: string; updatedAt: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   // Gera um instanceId único e persistente (usando localStorage)
   const instanceId = useMemo(() => {
@@ -25,6 +28,17 @@ export const ConvisoPlatformConfig = () => {
     return newId;
   }, []);
 
+  // Company ID from localStorage (load from saved integration if exists)
+  const [companyId, setCompanyId] = useState<string>(() => {
+    return localStorage.getItem('conviso_company_id') || '';
+  });
+
+  // Auto-import setting from localStorage
+  const [autoImportEnabled, setAutoImportEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem('conviso_auto_import_enabled');
+    return saved === 'true';
+  });
+
   // Captura a URL base do Backstage
   const backstageUrl = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -33,9 +47,93 @@ export const ConvisoPlatformConfig = () => {
     return '';
   }, []);
 
+  // Check if integration exists on mount - restore from localStorage
+  useEffect(() => {
+    async function checkIntegration() {
+      setLoadingIntegration(true);
+      try {
+        const savedIntegrationId = localStorage.getItem('conviso_integration_id');
+        const savedCompanyId = localStorage.getItem('conviso_company_id');
+        
+        // If we have saved integration data, restore it immediately
+        if (savedCompanyId) {
+          setCompanyId(savedCompanyId);
+          
+          let integrationRestored = false;
+          
+          // Try to verify integration exists (optional check)
+          try {
+            const result = await api.getIntegration(instanceId);
+            if (result && result.integration) {
+              // Integration verified, use the data from backend
+              setIntegration(result.integration);
+              if (result.companyId) {
+                setCompanyId(result.companyId.toString());
+                localStorage.setItem('conviso_company_id', result.companyId.toString());
+              }
+              if (result.integration.id) {
+                localStorage.setItem('conviso_integration_id', result.integration.id);
+              }
+              integrationRestored = true;
+            } else if (savedIntegrationId) {
+              // Backend check failed but we have saved data, restore from localStorage
+              // Create a mock integration object from saved data
+              setIntegration({
+                id: savedIntegrationId,
+                backstageUrl: backstageUrl,
+                instanceId: instanceId,
+                updatedAt: new Date().toISOString(),
+              });
+              integrationRestored = true;
+            }
+          } catch (e: any) {
+            // If verification fails, restore from localStorage anyway
+            console.warn('[Conviso] Could not verify integration, using saved data:', e);
+            if (savedIntegrationId) {
+              setIntegration({
+                id: savedIntegrationId,
+                backstageUrl: backstageUrl,
+                instanceId: instanceId,
+                updatedAt: new Date().toISOString(),
+              });
+              integrationRestored = true;
+            }
+          }
+          
+          // If we have integration data (from verification or localStorage), switch to import tab
+          if (integrationRestored || savedIntegrationId) {
+            setActiveTab(1);
+            
+            // Load auto-import setting
+            try {
+              const setting = await api.getAutoImport(instanceId);
+              setAutoImportEnabled(setting.enabled);
+            } catch (e: any) {
+              console.warn('[Conviso] Could not load auto-import setting:', e);
+            }
+          }
+        }
+      } catch (e: any) {
+        console.warn('[Conviso] Error checking integration:', e);
+        // Don't clear saved data on error - keep it for next time
+      } finally {
+        setLoadingIntegration(false);
+      }
+    }
+    
+    checkIntegration();
+  }, [api, instanceId, backstageUrl]); // Note: removed integration from deps to avoid infinite loop
+
+  // Save companyId to localStorage when it changes
+  useEffect(() => {
+    if (companyId) {
+      localStorage.setItem('conviso_company_id', companyId);
+    }
+  }, [companyId]);
+
   async function handleCreateIntegration() {
-    if (!companyId.trim()) {
-      setErrorMessage('Company ID is required');
+    if (!companyId || isNaN(parseInt(companyId, 10))) {
+      setErrorMessage('Please enter a valid Company ID');
       return;
     }
 
@@ -50,15 +148,16 @@ export const ConvisoPlatformConfig = () => {
         instanceId: instanceId,
       });
 
-      const integration = result?.backstageIntegration;
+      const updatedIntegration = result?.backstageIntegration;
 
-      if (integration) {
-        setIntegrationId(integration.id);
-        setSuccessMessage(
-          `Integration ${integration.id ? 'updated' : 'created'} successfully! ID: ${integration.id}`
-        );
-      } else {
+      if (updatedIntegration) {
+        setIntegration(updatedIntegration);
+        // Save integration_id and company_id to localStorage
+        localStorage.setItem('conviso_integration_id', updatedIntegration.id);
+        localStorage.setItem('conviso_company_id', companyId);
         setSuccessMessage('Integration created/updated successfully!');
+        // Switch to Import Projects tab after successful creation
+        setTimeout(() => setActiveTab(1), 100);
       }
     } catch (e: any) {
       setErrorMessage(e?.message || 'Failed to create integration');
@@ -75,9 +174,17 @@ export const ConvisoPlatformConfig = () => {
       </Header>
       <Content>
         <ContentHeader title="Integration" />
+        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+          <Tab label="Configure Integration" />
+          {integration && <Tab label="Import Projects" />}
+        </Tabs>
+        {activeTab === 0 && (
         <Grid container spacing={3} direction="column">
           <Grid item>
             <InfoCard title="Backstage Integration">
+              {loadingIntegration ? (
+                <Progress />
+              ) : (
               <Grid container spacing={3} direction="column">
                 {errorMessage ? (
                   <Grid item>
@@ -91,28 +198,19 @@ export const ConvisoPlatformConfig = () => {
                 ) : null}
                 <Grid item>
                   <Typography variant="body1" gutterBottom>
-                    This plugin uses Backstage proxy to authenticate and call Conviso Platform GraphQL. Enter your Company ID below and click the button to create/update the Backstage integration.
+                    Enter your Conviso Platform Company ID and click the button below to create/update the Backstage integration.
                   </Typography>
                 </Grid>
                 <Grid item>
                   <TextField
                     label="Company ID"
-                    type="text"
-                    variant="outlined"
-                    fullWidth
+                    type="number"
                     value={companyId}
                     onChange={(e) => setCompanyId(e.target.value)}
-                    placeholder="Enter your Conviso Platform Company ID"
-                    disabled={submitting}
+                    fullWidth
+                    required
+                    helperText={integration ? "Changing Company ID will recreate the integration." : "Enter your Conviso Platform Company ID"}
                   />
-                </Grid>
-                <Grid item>
-                  <Typography variant="body2" color="textSecondary">
-                    Backstage URL: {backstageUrl || 'Not available'}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Instance ID: {instanceId}
-                  </Typography>
                 </Grid>
                 <Grid item>
                   {submitting ? (
@@ -122,19 +220,27 @@ export const ConvisoPlatformConfig = () => {
                       variant="contained" 
                       color="primary" 
                       onClick={handleCreateIntegration}
-                      disabled={!companyId.trim()}
+                      disabled={submitting || !companyId}
                     >
-                      {integrationId ? 'Update Integration' : 'Create Integration'}
+                      {integration ? 'Update Integration' : 'Create Integration'}
                     </Button>
                   )}
                 </Grid>
               </Grid>
+              )}
             </InfoCard>
           </Grid>
         </Grid>
+        )}
+        {activeTab === 1 && integration && (
+          <ProjectSelector onImportSuccess={() => {
+            // After successful import, enable auto-import toggle visibility
+          }} />
+        )}
       </Content>
     </Page>
   );
 };
+
 
 
