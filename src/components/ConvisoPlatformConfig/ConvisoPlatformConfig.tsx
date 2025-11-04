@@ -1,6 +1,6 @@
 import { Content, Header, HeaderLabel, InfoCard, Page, Progress, WarningPanel } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
-import { Button, Grid, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Button, Grid, Tab, Tabs, Typography } from '@material-ui/core';
 import { useEffect, useMemo, useState } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import '../../styles/conviso-theme.css';
@@ -28,9 +28,6 @@ export const ConvisoPlatformConfig = () => {
     return newId;
   }, []);
 
-  const [companyId, setCompanyId] = useState<string>(() => {
-    return localStorage.getItem('conviso_company_id') || '';
-  });
 
   const backstageUrl = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -44,50 +41,43 @@ export const ConvisoPlatformConfig = () => {
       setLoadingIntegration(true);
       try {
         const savedIntegrationId = localStorage.getItem('conviso_integration_id');
-        const savedCompanyId = localStorage.getItem('conviso_company_id');
         
-        if (savedCompanyId) {
-          setCompanyId(savedCompanyId);
-          
-          let integrationRestored = false;
-          
-          try {
-            const result = await api.getIntegration(instanceId);
-            if (result && result.integration) {
-              setIntegration(result.integration);
-              if (result.companyId) {
-                setCompanyId(result.companyId.toString());
-                localStorage.setItem('conviso_company_id', result.companyId.toString());
-              }
-              if (result.integration.id) {
-                localStorage.setItem('conviso_integration_id', result.integration.id);
-              }
-              integrationRestored = true;
-            } else if (savedIntegrationId) {
-              setIntegration({
-                id: savedIntegrationId,
-                backstageUrl: backstageUrl,
-                instanceId: instanceId,
-                updatedAt: new Date().toISOString(),
-              });
-              integrationRestored = true;
+        let integrationRestored = false;
+        
+        try {
+          const result = await api.getIntegration(instanceId);
+          if (result && result.integration) {
+            setIntegration(result.integration);
+            if (result.companyId) {
+              localStorage.setItem('conviso_company_id', result.companyId.toString());
             }
-          } catch (e: any) {
-            if (savedIntegrationId) {
-              setIntegration({
-                id: savedIntegrationId,
-                backstageUrl: backstageUrl,
-                instanceId: instanceId,
-                updatedAt: new Date().toISOString(),
-              });
-              integrationRestored = true;
+            if (result.integration.id) {
+              localStorage.setItem('conviso_integration_id', result.integration.id);
             }
+            integrationRestored = true;
+          } else if (savedIntegrationId) {
+            setIntegration({
+              id: savedIntegrationId,
+              backstageUrl: backstageUrl,
+              instanceId: instanceId,
+              updatedAt: new Date().toISOString(),
+            });
+            integrationRestored = true;
           }
-          
-          if (integrationRestored || savedIntegrationId) {
-            setActiveTab(1);
-            
+        } catch (e: any) {
+          if (savedIntegrationId) {
+            setIntegration({
+              id: savedIntegrationId,
+              backstageUrl: backstageUrl,
+              instanceId: instanceId,
+              updatedAt: new Date().toISOString(),
+            });
+            integrationRestored = true;
           }
+        }
+        
+        if (integrationRestored || savedIntegrationId) {
+          setActiveTab(1);
         }
       } catch (e: any) {
       } finally {
@@ -98,35 +88,23 @@ export const ConvisoPlatformConfig = () => {
     checkIntegration();
   }, [api, instanceId, backstageUrl]);
 
-  useEffect(() => {
-    if (companyId) {
-      localStorage.setItem('conviso_company_id', companyId);
-    }
-  }, [companyId]);
 
   async function handleCreateIntegration() {
-    if (!companyId || isNaN(parseInt(companyId, 10))) {
-      setErrorMessage('Please enter a valid Company ID');
-      return;
-    }
-
     setSubmitting(true);
     try {
       setErrorMessage(undefined);
       setSuccessMessage(undefined);
 
       const result = await api.createOrUpdateBackstageIntegration({
-        companyId: parseInt(companyId, 10),
         backstageUrl: backstageUrl,
         instanceId: instanceId,
-      });
+      } as any);
 
       const updatedIntegration = result?.backstageIntegration;
 
       if (updatedIntegration) {
         setIntegration(updatedIntegration);
         localStorage.setItem('conviso_integration_id', updatedIntegration.id);
-        localStorage.setItem('conviso_company_id', companyId);
         setSuccessMessage('Integration created/updated successfully!');
         setTimeout(() => setActiveTab(1), 100);
       }
@@ -193,20 +171,9 @@ export const ConvisoPlatformConfig = () => {
                 ) : null}
                 <Grid item>
                   <Typography variant="body1" gutterBottom>
-                    Enter your Conviso Platform Company ID and click the button below to create/update the Backstage integration.
+                    Click the button below to create/update the Backstage integration. 
+                    The Company ID will be automatically retrieved from the backend configuration (CONVISO_COMPANY_ID).
                   </Typography>
-                </Grid>
-                <Grid item>
-                  <TextField
-                    label="Company ID"
-                    type="number"
-                    value={companyId}
-                    onChange={(e) => setCompanyId(e.target.value)}
-                    fullWidth
-                    required
-                    className="conviso-text-field"
-                    helperText={integration ? "Changing Company ID will recreate the integration." : "Enter your Conviso Platform Company ID"}
-                  />
                 </Grid>
                 <Grid item>
                   {submitting ? (
@@ -216,7 +183,7 @@ export const ConvisoPlatformConfig = () => {
                       variant="contained" 
                       className="conviso-button-primary"
                       onClick={handleCreateIntegration}
-                      disabled={submitting || !companyId}
+                      disabled={submitting}
                     >
                       {integration ? 'Update Integration' : 'Create Integration'}
                     </Button>

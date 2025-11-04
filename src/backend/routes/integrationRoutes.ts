@@ -27,7 +27,7 @@ export function createIntegrationRoutes(
         return res.status(404).json({ error: 'Integration not found' });
       }
 
-      const companyId = inMemoryStore.getCompanyId(instanceId);
+      const companyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
       
       if (companyId) {
         return res.json({ integration, companyId });
@@ -41,14 +41,20 @@ export function createIntegrationRoutes(
 
   router.post('/integration', async (req, res) => {
     try {
-      const { companyId, backstageUrl, instanceId } = req.body;
+      const { companyId: companyIdFromBody, backstageUrl, instanceId } = req.body;
 
       if (!backstageUrl || !instanceId) {
         return res.status(400).json({ error: 'backstageUrl and instanceId are required' });
       }
 
+      const companyId = companyIdFromBody 
+        ? parseInt(companyIdFromBody.toString(), 10)
+        : config.companyId;
+
       if (!companyId) {
-        return res.status(400).json({ error: 'Company ID is required' });
+        return res.status(400).json({ 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the request body.' 
+        });
       }
 
       if (!config.apiKey) {
@@ -56,7 +62,7 @@ export function createIntegrationRoutes(
       }
 
       const result = await integrationService.createOrUpdateIntegration({
-        companyId: parseInt(companyId.toString(), 10),
+        companyId,
         backstageUrl,
         instanceId,
       });

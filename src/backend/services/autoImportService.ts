@@ -1,6 +1,7 @@
 import { AuthService } from '@backstage/backend-plugin-api';
 import { Entity } from '@backstage/catalog-model';
 import { CatalogService } from '@backstage/plugin-catalog-node';
+import { ConvisoConfig } from '../config/convisoConfig';
 import { inMemoryStore } from '../store/inMemoryStore';
 import { extractProjectDataFromEntity } from '../utils/entityMapper';
 import { AssetService } from './assetService';
@@ -16,7 +17,8 @@ export class AutoImportService {
     private assetService: AssetService,
     private apiService: ConvisoApiService,
     private catalogApi: CatalogService,
-    private auth: AuthService
+    private auth: AuthService,
+    private config: ConvisoConfig
   ) {}
 
   async importEntity(entity: Entity, companyId: number): Promise<void> {
@@ -54,8 +56,15 @@ export class AutoImportService {
         return results;
       }
 
-      for (const { instanceId, companyId } of enabledInstances) {
+      for (const { instanceId, companyId: companyIdFromStore } of enabledInstances) {
         try {
+          const companyId = companyIdFromStore || this.config.companyId;
+          
+          if (!companyId) {
+            results.errors.push(`No companyId found for instance ${instanceId}. Set CONVISO_COMPANY_ID in .env file.`);
+            continue;
+          }
+          
           const importedAssetNames = await this.assetService.getImportedAssetNames(companyId);
 
           const entities = await this.catalogApi.getEntities(

@@ -32,11 +32,12 @@ export const convisoBackendPlugin = createBackendPlugin({
           assetService,
           apiService,
           catalogApi,
-          auth
+          auth,
+          config
         );
 
         router.use(createIntegrationRoutes(integrationService, config));
-        router.use(createAutoImportRoutes(integrationService, autoImportService));
+        router.use(createAutoImportRoutes(integrationService, autoImportService, config));
         router.use(createImportRoutes(assetService, config));
 
         const pollingInterval = config.environment === 'production' 

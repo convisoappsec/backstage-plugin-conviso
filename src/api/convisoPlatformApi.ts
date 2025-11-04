@@ -114,7 +114,7 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        companyId: input.companyId,
+        ...(input.companyId ? { companyId: input.companyId } : {}),
         backstageUrl: input.backstageUrl,
         instanceId: input.instanceId,
       }),

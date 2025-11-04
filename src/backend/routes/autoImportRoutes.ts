@@ -1,11 +1,13 @@
 import express from 'express';
+import { ConvisoConfig } from '../config/convisoConfig';
 import { AutoImportService } from '../services/autoImportService';
 import { IntegrationService } from '../services/integrationService';
 import { inMemoryStore } from '../store/inMemoryStore';
 
 export function createAutoImportRoutes(
   integrationService: IntegrationService,
-  autoImportService: AutoImportService
+  autoImportService: AutoImportService,
+  config: ConvisoConfig
 ): express.Router {
   const router = express.Router();
 
@@ -21,7 +23,7 @@ export function createAutoImportRoutes(
 
       let companyId: number | undefined = companyIdFromRequest
         ? parseInt(companyIdFromRequest.toString(), 10)
-        : inMemoryStore.getCompanyId(instanceId);
+        : inMemoryStore.getCompanyId(instanceId) || config.companyId;
 
       if (companyIdFromRequest && companyId !== undefined) {
         inMemoryStore.setCompanyId(instanceId, companyId);
@@ -44,13 +46,13 @@ export function createAutoImportRoutes(
       }
 
       if (enabled) {
-        let currentCompanyId = inMemoryStore.getCompanyId(instanceId);
+        let currentCompanyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
 
         if (!currentCompanyId) {
           try {
             const integration = await integrationService.getIntegration(instanceId);
             if (integration) {
-              currentCompanyId = inMemoryStore.getCompanyId(instanceId);
+              currentCompanyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
             }
           } catch {
             // Could not fetch companyId from integration endpoint
