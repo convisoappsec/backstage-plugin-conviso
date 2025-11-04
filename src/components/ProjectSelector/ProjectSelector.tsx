@@ -8,7 +8,7 @@ import { useEntities } from '../../hooks/useEntities';
 import { useImportedAssets } from '../../hooks/useImportedAssets';
 import '../../styles/conviso-theme.css';
 import { getEntityId, mapEntityToProject } from '../../utils/mappers';
-import { normalizeName } from '../../utils/name-normalizer';
+import { normalizeName } from '../../utils/nameNormalizer';
 import { AutoImportToggle } from '../AutoImportToggle';
 import { ProjectTable } from '../ProjectTable';
 

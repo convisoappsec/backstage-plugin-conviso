@@ -1,7 +1,7 @@
 import { useApi } from '@backstage/core-plugin-api';
 import { useCallback, useEffect, useState } from 'react';
 import { convisoPlatformApiRef } from '../api/convisoPlatformApi';
-import { normalizeName } from '../utils/name-normalizer';
+import { normalizeName } from '../utils/nameNormalizer';
 
 export function useImportedAssets(companyId: number | null) {
   const api = useApi(convisoPlatformApiRef);

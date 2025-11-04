@@ -38,10 +38,10 @@ export interface BackstageProject {
   description?: string;
   url?: string;
   repoUrl?: string;
-  lifecycle?: string; // Valid values: production, homologation, certification, discontinued
+  lifecycle?: string;
   tags?: string[];
   owner?: string;
-  assetType?: string; // Valid values: api, web, progressive_web_app, native_mobile, hybrid_mobile, database, etc.
+  assetType?: string;
 }
 
 export interface ImportBackstageProjectsInput {
@@ -104,7 +104,6 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
   async createOrUpdateBackstageIntegration(
     input: CreateOrUpdateBackstageIntegrationInput
   ): Promise<CreateOrUpdateBackstageIntegrationResult> {
-    // Call backend module endpoint (like Snyk plugin approach)
     const baseUrl = await this.discoveryApi.getBaseUrl('backend');
     const backendBaseUrl = baseUrl.replace('/api/backend', '');
     const url = `${backendBaseUrl}/api/conviso/integration`;
@@ -148,7 +147,7 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
 
     if (!response.ok) {
       if (response.status === 404) {
-        return null; // Integration not found
+        return null;
       }
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to get integration');
@@ -161,7 +160,6 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
   async importBackstageProjectsToAssets(
     input: ImportBackstageProjectsInput
   ): Promise<ImportBackstageProjectsResult> {
-    // Call backend module endpoint (like Snyk plugin approach)
     const baseUrl = await this.discoveryApi.getBaseUrl('backend');
     const backendBaseUrl = baseUrl.replace('/api/backend', '');
     const url = `${backendBaseUrl}/api/conviso/import-projects`;

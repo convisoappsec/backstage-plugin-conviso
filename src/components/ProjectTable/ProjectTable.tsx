@@ -2,7 +2,7 @@ import { Checkbox, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typog
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { BackstageEntity } from '../../types/entity.types';
 import { getEntityId } from '../../utils/mappers';
-import { normalizeName } from '../../utils/name-normalizer';
+import { normalizeName } from '../../utils/nameNormalizer';
 
 interface ProjectTableProps {
   entities: BackstageEntity[];
