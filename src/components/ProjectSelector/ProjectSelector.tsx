@@ -67,7 +67,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     }
 
     if (!companyId) {
-      setErrorMessage('Company ID not found. Please go back to the Configure Integration tab and enter your Company ID.');
+      setErrorMessage('Company ID not found. Please configure the integration first.');
       return;
     }
 
@@ -142,7 +142,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
 
   const handleRefreshImportedAssets = useCallback(async () => {
     if (!companyId) {
-      setErrorMessage('Company ID not found. Please go back to the Configure Integration tab and enter your Company ID.');
+      setErrorMessage('Company ID not found. Please configure the integration first.');
       return;
     }
 
@@ -164,7 +164,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             variant="outlined"
             onClick={handleSelectAll}
             disabled={loading || importing || entities.length === 0 || autoImportEnabled}
-            title={autoImportEnabled ? "Desative a Importação Automática para usar import manual" : ""}
+            title={autoImportEnabled ? "Disable Automatic Import to enable manual import" : ""}
             className="conviso-button-secondary"
           >
             {selectedProjects.size === entities.length ? 'Deselect All' : 'Select All'}
@@ -182,8 +182,16 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             variant="contained"
             onClick={handleImport}
             disabled={loading || importing || selectedProjects.size === 0 || autoImportEnabled}
-            title={autoImportEnabled ? "Desative a Importação Automática para usar import manual" : ""}
+            title={autoImportEnabled ? "Disable Automatic Import to enable manual import" : ""}
             className="conviso-button-primary"
+            style={{
+              backgroundColor: '#2c3e50',
+              color: '#ffffff',
+              fontWeight: 600,
+              padding: '10px 24px',
+              borderRadius: '6px',
+              boxShadow: '0 2px 4px rgba(44, 62, 80, 0.2)',
+            }}
           >
             Import Selected ({selectedProjects.size})
           </Button>

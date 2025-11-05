@@ -31,7 +31,7 @@ export function ProjectTable({
               indeterminate={selectedProjects.size > 0 && selectedProjects.size < entities.length}
               onChange={onSelectAll}
               disabled={autoImportEnabled}
-              title={autoImportEnabled ? "Desative a Importação Automática para selecionar projetos manualmente" : ""}
+              title={autoImportEnabled ? "Disable Automatic Import to select projects manually" : ""}
             />
           </TableCell>
           <TableCell>Name</TableCell>
@@ -63,7 +63,7 @@ export function ProjectTable({
                   checked={isSelected}
                   onChange={() => onToggleProject(entityId)}
                   disabled={isImported || autoImportEnabled}
-                  title={autoImportEnabled ? "Desative a Importação Automática para selecionar projetos manualmente" : ""}
+                  title={autoImportEnabled ? "Disable Automatic Import to select projects manually" : ""}
                 />
               </TableCell>
               <TableCell>
@@ -100,7 +100,7 @@ export function ProjectTable({
                 {isImported ? (
                   <Chip
                     icon={<CheckCircleIcon />}
-                    label="✔ Imported"
+                    label="Imported"
                     size="small"
                     className="conviso-badge-imported"
                   />

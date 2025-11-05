@@ -15,8 +15,8 @@ describe('AutoImportToggle', () => {
       <AutoImportToggle enabled={false} onChange={mockOnChange} />
     );
 
-    expect(screen.getByText('Importação Automática')).toBeInTheDocument();
-    expect(screen.getByText('❌ Desativado')).toBeInTheDocument();
+    expect(screen.getByText('Automatic Import')).toBeInTheDocument();
+    expect(screen.getByText('Disabled')).toBeInTheDocument();
   });
 
   it('should render with toggle on', async () => {
@@ -24,9 +24,9 @@ describe('AutoImportToggle', () => {
       <AutoImportToggle enabled={true} onChange={mockOnChange} />
     );
 
-    expect(screen.getByText('✅ Ativado')).toBeInTheDocument();
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
     expect(
-      screen.getByText(/⚠️ Import manual está desabilitado/)
+      screen.getByText(/Manual import is disabled/)
     ).toBeInTheDocument();
   });
 
@@ -49,7 +49,7 @@ describe('AutoImportToggle', () => {
     );
 
     expect(
-      screen.getByText(/Quando ativado, novas entidades criadas no Backstage/)
+      screen.getByText(/When enabled, new components created in Backstage/)
     ).toBeInTheDocument();
   });
 });

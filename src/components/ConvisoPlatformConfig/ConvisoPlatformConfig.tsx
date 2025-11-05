@@ -154,14 +154,14 @@ export const ConvisoPlatformConfig = () => {
         {activeTab === 0 && (
         <Grid container spacing={3} direction="column">
           <Grid item>
-            <InfoCard title="Backstage Integration" className="conviso-info-card">
+            <InfoCard title="Conviso Platform Integration" className="conviso-info-card">
               {loadingIntegration ? (
                 <Progress />
               ) : (
               <Grid container spacing={3} direction="column">
                 {errorMessage ? (
                   <Grid item>
-                    <WarningPanel title="Create integration failed">{errorMessage}</WarningPanel>
+                    <WarningPanel title="Integration Error">{errorMessage}</WarningPanel>
                   </Grid>
                 ) : null}
                 {successMessage ? (
@@ -171,8 +171,9 @@ export const ConvisoPlatformConfig = () => {
                 ) : null}
                 <Grid item>
                   <Typography variant="body1" gutterBottom>
-                    Click the button below to create/update the Backstage integration. 
-                    The Company ID will be automatically retrieved from the backend configuration (CONVISO_COMPANY_ID).
+                    Connect your Backstage catalog to Conviso Platform to sync components as security assets. 
+                    This integration enables automatic import of Backstage entities into Conviso Platform for security management. 
+                    The Company ID is automatically configured from the backend settings.
                   </Typography>
                 </Grid>
                 <Grid item>
@@ -184,8 +185,16 @@ export const ConvisoPlatformConfig = () => {
                       className="conviso-button-primary"
                       onClick={handleCreateIntegration}
                       disabled={submitting}
+                      style={{
+                        backgroundColor: '#2c3e50',
+                        color: '#ffffff',
+                        fontWeight: 600,
+                        padding: '10px 24px',
+                        borderRadius: '6px',
+                        boxShadow: '0 2px 4px rgba(44, 62, 80, 0.2)',
+                      }}
                     >
-                      {integration ? 'Update Integration' : 'Create Integration'}
+                      Create / Update Integration
                     </Button>
                   )}
                 </Grid>

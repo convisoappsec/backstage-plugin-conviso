@@ -10,6 +10,30 @@
   --conviso-border-gray: #e0e0e0;
 }
 
+/* ULTRA AGGRESSIVE: Remove ALL purple backgrounds from Backstage headers */
+header[class*="BackstageHeader"],
+div[class*="BackstageHeader"],
+[class*="BackstageHeader"],
+[class*="BackstageHeader-header"],
+header[class*="BackstageHeader-header"],
+div[class*="BackstageHeader-header"] {
+  background-image: none !important;
+  background: linear-gradient(135deg, #0a2540 0%, #0d1b2a 100%) !important;
+}
+
+/* Remove ANY background-image with SVG or data URLs */
+header[class*="BackstageHeader"]::before,
+div[class*="BackstageHeader"]::before,
+[class*="BackstageHeader"]::before,
+[class*="BackstageHeader-header"]::before,
+header[class*="BackstageHeader-header"]::before,
+div[class*="BackstageHeader-header"]::before {
+  background-image: none !important;
+  background: none !important;
+  display: none !important;
+  content: none !important;
+}
+
 /* Override Backstage default purple/primary colors with Conviso blue - FORCE BLUE */
 /* Target ALL Backstage Header classes (including dynamically generated ones) */
 [data-theme-id="tool"] .MuiHeader-root,
@@ -18,17 +42,70 @@
 header[class*="Header"],
 div[class*="Header"],
 .MuiPaper-root[class*="Header"],
-/* Target Backstage-specific header classes */
+/* Target Backstage-specific header classes - HIGHEST PRIORITY */
+header[class*="BackstageHeader"],
+div[class*="BackstageHeader"],
 [class*="BackstageHeader"],
 [class*="BackstageHeader-header"],
 [class*="BackstageHeader-root"],
 [class^="BackstageHeader-"],
-header[class*="BackstageHeader"],
-div[class*="BackstageHeader"] {
+header[class*="BackstageHeader-header"],
+div[class*="BackstageHeader-header"] {
+  background-image: none !important;
   background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
   color: var(--conviso-white) !important;
-  background-image: none !important;
   background-color: var(--conviso-primary-blue) !important;
+}
+
+/* Remove background-image from pseudo-elements */
+header[class*="BackstageHeader"]::before,
+header[class*="BackstageHeader"]::after,
+div[class*="BackstageHeader"]::before,
+div[class*="BackstageHeader"]::after,
+[class*="BackstageHeader"]::before,
+[class*="BackstageHeader"]::after,
+[class*="BackstageHeader-header"]::before,
+[class*="BackstageHeader-header"]::after,
+header[class*="BackstageHeader-header"]::before,
+header[class*="BackstageHeader-header"]::after,
+div[class*="BackstageHeader-header"]::before,
+div[class*="BackstageHeader-header"]::after {
+  background-image: none !important;
+  background: none !important;
+  display: none !important;
+  content: none !important;
+}
+
+header[class*="BackstageHeader"],
+div[class*="BackstageHeader"],
+[class*="BackstageHeader"],
+[class*="BackstageHeader-header"] {
+  background-image: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+  background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+}
+
+/* Force override any purple gradient background-image - REMOVE ALL */
+[class*="BackstageHeader"][style*="background-image"],
+[class*="BackstageHeader-header"][style*="background-image"],
+header[class*="BackstageHeader"][style*="background-image"],
+div[class*="BackstageHeader"][style*="background-image"],
+header[class*="BackstageHeader-header"][style*="background-image"],
+div[class*="BackstageHeader-header"][style*="background-image"] {
+  background-image: none !important;
+  background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+}
+
+/* Override specific purple gradient colors */
+[class*="BackstageHeader"][style*="#8912CA"],
+[class*="BackstageHeader"][style*="#3E00EA"],
+[class*="BackstageHeader"][style*="8912CA"],
+[class*="BackstageHeader"][style*="3E00EA"],
+[class*="BackstageHeader-header"][style*="#8912CA"],
+[class*="BackstageHeader-header"][style*="#3E00EA"],
+[class*="BackstageHeader-header"][style*="8912CA"],
+[class*="BackstageHeader-header"][style*="3E00EA"] {
+  background-image: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+  background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
 }
 
 /* Force remove any purple gradient or background */
@@ -36,9 +113,13 @@ div[class*="BackstageHeader"] {
 [data-theme-id="tool"] header::before,
 .MuiHeader-root::before,
 [class*="BackstageHeader"]::before,
-[class*="BackstageHeader-header"]::before {
+[class*="BackstageHeader-header"]::before,
+header[class*="BackstageHeader"]::before,
+div[class*="BackstageHeader"]::before {
   display: none !important;
   content: none !important;
+  background: none !important;
+  background-image: none !important;
 }
 
 /* Override any inline styles that might have purple */
@@ -48,9 +129,55 @@ div[class*="BackstageHeader"] {
 header[style*="background"][style*="purple"],
 header[style*="background"][style*="violet"],
 [class*="BackstageHeader"][style*="background"],
-[class*="BackstageHeader-header"][style*="background"] {
+[class*="BackstageHeader-header"][style*="background"],
+header[class*="BackstageHeader"][style*="background"],
+div[class*="BackstageHeader"][style*="background"] {
   background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+  background-image: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
   background-color: var(--conviso-primary-blue) !important;
+}
+
+/* Force override any background-image with linear-gradient containing purple colors */
+[class*="BackstageHeader"][style*="linear-gradient"],
+[class*="BackstageHeader-header"][style*="linear-gradient"],
+header[class*="BackstageHeader"][style*="linear-gradient"],
+div[class*="BackstageHeader"][style*="linear-gradient"],
+header[class*="BackstageHeader-header"][style*="linear-gradient"],
+div[class*="BackstageHeader-header"][style*="linear-gradient"] {
+  background-image: none !important;
+  background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+}
+
+/* Override background-image with SVG data URLs - REMOVE ALL */
+header[class*="BackstageHeader"][style*="data:image"],
+div[class*="BackstageHeader"][style*="data:image"],
+[class*="BackstageHeader"][style*="data:image"],
+[class*="BackstageHeader-header"][style*="data:image"],
+header[class*="BackstageHeader-header"][style*="data:image"],
+div[class*="BackstageHeader-header"][style*="data:image"],
+header[class*="BackstageHeader"][style*="url"],
+div[class*="BackstageHeader"][style*="url"],
+[class*="BackstageHeader"][style*="url"],
+[class*="BackstageHeader-header"][style*="url"],
+header[class*="BackstageHeader-header"][style*="url"],
+div[class*="BackstageHeader-header"][style*="url"],
+header[class*="BackstageHeader"][style*="svg"],
+div[class*="BackstageHeader"][style*="svg"],
+[class*="BackstageHeader"][style*="svg"],
+[class*="BackstageHeader-header"][style*="svg"],
+header[class*="BackstageHeader-header"][style*="svg"],
+div[class*="BackstageHeader-header"][style*="svg"] {
+  background-image: none !important;
+  background: linear-gradient(135deg, var(--conviso-primary-blue) 0%, var(--conviso-dark-blue) 100%) !important;
+}
+
+/* Force remove background-image from any element with style attribute containing background */
+header[class*="BackstageHeader"][style],
+div[class*="BackstageHeader"][style],
+[class*="BackstageHeader"][style],
+[class*="BackstageHeader-header"][style],
+header[class*="BackstageHeader-header"][style],
+div[class*="BackstageHeader-header"][style] {
   background-image: none !important;
 }
 
@@ -173,21 +300,100 @@ header[class*="BackstageHeader"] p {
   margin-bottom: 20px;
 }
 
-/* Buttons */
-.conviso-button-primary {
-  background: var(--conviso-primary-blue) !important;
-  color: var(--conviso-white) !important;
+/* Buttons - Primary Action Button (Dark Blue-Grey) */
+/* High specificity selectors to override Material-UI dynamically generated classes */
+.conviso-button-primary,
+button.conviso-button-primary,
+button.MuiButton-contained.conviso-button-primary,
+button.MuiButton-root.conviso-button-primary,
+button.MuiButtonBase-root.conviso-button-primary,
+.MuiButton-contained.conviso-button-primary,
+.MuiButton-root.conviso-button-primary,
+.MuiButtonBase-root.conviso-button-primary,
+[class*="MuiButton-contained"].conviso-button-primary,
+[class*="MuiButton-root"].conviso-button-primary,
+[class*="MuiButtonBase-root"].conviso-button-primary,
+button[class*="MuiButton-contained"].conviso-button-primary,
+button[class*="MuiButton-root"].conviso-button-primary,
+button[class*="MuiButtonBase-root"].conviso-button-primary {
+  background: #2c3e50 !important;
+  background-color: #2c3e50 !important;
+  background-image: none !important;
+  color: #ffffff !important;
   font-weight: 600 !important;
   padding: 10px 24px !important;
   border-radius: 6px !important;
   text-transform: none !important;
   transition: all 0.2s ease !important;
+  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2) !important;
+  border: none !important;
+  min-width: 64px !important;
 }
 
-.conviso-button-primary:hover {
-  background: var(--conviso-dark-blue) !important;
-  box-shadow: 0 4px 8px rgba(10, 37, 64, 0.3) !important;
+.conviso-button-primary:hover,
+button.conviso-button-primary:hover,
+button.MuiButton-contained.conviso-button-primary:hover,
+button.MuiButton-root.conviso-button-primary:hover,
+button.MuiButtonBase-root.conviso-button-primary:hover,
+.MuiButton-contained.conviso-button-primary:hover,
+.MuiButton-root.conviso-button-primary:hover,
+.MuiButtonBase-root.conviso-button-primary:hover,
+[class*="MuiButton-contained"].conviso-button-primary:hover,
+[class*="MuiButton-root"].conviso-button-primary:hover,
+[class*="MuiButtonBase-root"].conviso-button-primary:hover,
+button[class*="MuiButton-contained"].conviso-button-primary:hover,
+button[class*="MuiButton-root"].conviso-button-primary:hover,
+button[class*="MuiButtonBase-root"].conviso-button-primary:hover {
+  background: #1a252f !important;
+  background-color: #1a252f !important;
+  background-image: none !important;
+  box-shadow: 0 4px 8px rgba(44, 62, 80, 0.4) !important;
   transform: translateY(-1px);
+}
+
+/* Override text color in button labels */
+.conviso-button-primary .MuiButton-label,
+.conviso-button-primary span,
+.conviso-button-primary .MuiButton-label-1700,
+.conviso-button-primary [class*="MuiButton-label"],
+button.conviso-button-primary .MuiButton-label,
+button.conviso-button-primary span,
+button.conviso-button-primary [class*="MuiButton-label"] {
+  color: #ffffff !important;
+}
+
+/* Override MUI default contained button styles with maximum specificity */
+button.MuiButton-contained.conviso-button-primary,
+button[class*="MuiButton-contained"].conviso-button-primary,
+.MuiButton-contained.conviso-button-primary,
+[class*="MuiButton-contained"].conviso-button-primary {
+  background-color: #2c3e50 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2) !important;
+}
+
+button.MuiButton-contained.conviso-button-primary:hover,
+button[class*="MuiButton-contained"].conviso-button-primary:hover,
+.MuiButton-contained.conviso-button-primary:hover,
+[class*="MuiButton-contained"].conviso-button-primary:hover {
+  background-color: #1a252f !important;
+  box-shadow: 0 4px 8px rgba(44, 62, 80, 0.4) !important;
+}
+
+/* Override any MUI-generated class names with specific numeric suffixes */
+button[class*="MuiButton-contained-"][class*="conviso-button-primary"],
+button[class*="MuiButton-root-"][class*="conviso-button-primary"],
+button[class*="MuiButtonBase-root-"][class*="conviso-button-primary"] {
+  background-color: #2c3e50 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2) !important;
+}
+
+button[class*="MuiButton-contained-"][class*="conviso-button-primary"]:hover,
+button[class*="MuiButton-root-"][class*="conviso-button-primary"]:hover,
+button[class*="MuiButtonBase-root-"][class*="conviso-button-primary"]:hover {
+  background-color: #1a252f !important;
+  box-shadow: 0 4px 8px rgba(44, 62, 80, 0.4) !important;
 }
 
 .conviso-button-secondary {
@@ -656,14 +862,15 @@ body[data-theme="dark"] {
 
 /* Dark theme - Buttons */
 [data-theme="dark"] .conviso-button-primary {
-  background: #1e3a5f !important;
+  background: #2c3e50 !important;
   color: #ffffff !important;
-  border: 1px solid #2d5a8a !important;
+  border: 1px solid #34495e !important;
+  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.3) !important;
 }
 
 [data-theme="dark"] .conviso-button-primary:hover {
-  background: #2d5a8a !important;
-  box-shadow: 0 4px 8px rgba(30, 58, 95, 0.4) !important;
+  background: #1a252f !important;
+  box-shadow: 0 4px 8px rgba(44, 62, 80, 0.5) !important;
 }
 
 [data-theme="dark"] .conviso-button-secondary {
