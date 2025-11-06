@@ -1,13 +1,14 @@
 import { ContentHeader, InfoCard, Progress, WarningPanel } from '@backstage/core-components';
-import { useApi } from '@backstage/core-plugin-api';
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Button, Grid, InputAdornment, TextField, Typography } from '@material-ui/core';
+import SearchIcon from '@material-ui/icons/Search';
 import { useCallback, useMemo, useState } from 'react';
-import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import { useAutoImport } from '../../hooks/useAutoImport';
 import { useEntities } from '../../hooks/useEntities';
+import { useEntityFilter } from '../../hooks/useEntityFilter';
 import { useImportedAssets } from '../../hooks/useImportedAssets';
-import { getEntityId, mapEntityToProject } from '../../utils/mappers';
-import { normalizeName } from '../../utils/nameNormalizer';
+import { usePagination } from '../../hooks/usePagination';
+import { useProjectImport } from '../../hooks/useProjectImport';
+import { useProjectSelection } from '../../hooks/useProjectSelection';
 import { AutoImportToggle } from '../AutoImportToggle';
 import { ProjectTable } from '../ProjectTable';
 
@@ -16,7 +17,6 @@ interface ProjectSelectorProps {
 }
 
 export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
-  const api = useApi(convisoPlatformApiRef);
   const { entities, loading: entitiesLoading, error: entitiesError } = useEntities();
   
   const companyIdStr = useMemo(() => localStorage.getItem('conviso_company_id'), []);
@@ -32,142 +32,67 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
   const instanceId = useMemo(() => localStorage.getItem('conviso_backstage_instance_id') || '', []);
   const { autoImportEnabled, setAutoImportEnabled } = useAutoImport(instanceId, companyId || undefined);
 
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
-  const [importing, setImporting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [successMessage, setSuccessMessage] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const loading = entitiesLoading || assetsLoading;
+  const { filteredEntities } = useEntityFilter({ entities, searchQuery });
+  const {
+    paginatedItems: paginatedEntities,
+    page,
+    rowsPerPage,
+    totalCount,
+    handlePageChange,
+    handleRowsPerPageChange,
+    resetPage,
+  } = usePagination({ items: filteredEntities });
 
-  const handleToggleProject = useCallback((entityId: string) => {
-    setSelectedProjects(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(entityId)) {
-        newSet.delete(entityId);
-      } else {
-        newSet.add(entityId);
-      }
-      return newSet;
-    });
-  }, []);
+  const {
+    selectedProjects,
+    toggleProject,
+    selectAll,
+    selectAllVisible,
+    clearSelection,
+    isAllSelected,
+    isAllVisibleSelected,
+    isSomeVisibleSelected,
+  } = useProjectSelection({ 
+    entities, 
+    importedAssets,
+    visibleEntities: paginatedEntities,
+  });
 
-  const handleSelectAll = useCallback(() => {
-    // Filtra apenas itens não importados
-    const nonImportedEntities = entities.filter(e => {
-      const name = normalizeName(e.metadata.name);
-      return !importedAssets.has(name);
-    });
-    
-    const nonImportedIds = new Set(nonImportedEntities.map(e => getEntityId(e)));
-    
-    // Verifica se todos os não importados estão selecionados
-    const allNonImportedSelected = nonImportedIds.size > 0 && 
-      Array.from(nonImportedIds).every(id => selectedProjects.has(id));
-    
-    if (allNonImportedSelected) {
-      // Desmarca todos os não importados
-      setSelectedProjects(new Set());
-    } else {
-      // Seleciona todos os não importados
-      setSelectedProjects(nonImportedIds);
-    }
-  }, [selectedProjects, entities, importedAssets]);
+  const {
+    importing,
+    errorMessage: importError,
+    successMessage: importSuccess,
+    handleImport,
+  } = useProjectImport({
+    entities,
+    selectedProjects,
+    importedAssets,
+    companyId,
+    onImportSuccess,
+    onSelectionCleared: clearSelection,
+  });
 
-  const handleImport = useCallback(async () => {
-    if (selectedProjects.size === 0) {
-      setErrorMessage('Please select at least one project to import');
-      return;
-    }
-
-    if (!companyId) {
-      setErrorMessage('Company ID not found. Please configure the integration first.');
-      return;
-    }
-
-    setImporting(true);
-    setErrorMessage(undefined);
-    setSuccessMessage(undefined);
-
-    try {
-      const projectsToImport = entities
-        .filter(e => {
-          const entityId = getEntityId(e);
-          const entityName = normalizeName(e.metadata.name);
-          const isAlreadyImported = importedAssets.has(entityName);
-          return selectedProjects.has(entityId) && !isAlreadyImported;
-        })
-        .map(mapEntityToProject);
-
-      if (projectsToImport.length === 0) {
-        setErrorMessage('All selected projects have already been imported');
-        setImporting(false);
-        return;
-      }
-
-      const result = await api.importBackstageProjectsToAssets({
-        companyId,
-        projects: projectsToImport,
-      });
-
-      if (result.success) {
-        setSuccessMessage(`Successfully imported ${result.importedCount} project(s)!`);
-        setSelectedProjects(new Set());
-        
-        const expectedImportedNames = projectsToImport.map(p => normalizeName(p.name));
-        const currentImported = new Set(importedAssets);
-        expectedImportedNames.forEach(name => {
-          if (name) {
-            currentImported.add(name);
-          }
-        });
-        
-        const pollForImportedAssets = async (attempt: number = 1, maxAttempts: number = 5) => {
-          if (attempt > maxAttempts) return;
-
-          try {
-            const refreshedNames = await refreshImportedAssets(companyId);
-            const allFound = expectedImportedNames.every(name => refreshedNames.has(name));
-            
-            if (!allFound) {
-              setTimeout(() => pollForImportedAssets(attempt + 1, maxAttempts), 2000);
-            }
-          } catch {
-            // On error, keep the local state we already updated
-          }
-        };
-        
-        setTimeout(() => pollForImportedAssets(1, 5), 2000);
-        
-        if (onImportSuccess) {
-          onImportSuccess();
-        }
-      } else {
-        setErrorMessage(
-          `Imported ${result.importedCount} project(s), but encountered errors: ${result.errors?.join(', ') || 'Unknown errors'}`
-        );
-      }
-    } catch (e: any) {
-      setErrorMessage(e?.message || 'Failed to import projects');
-    } finally {
-      setImporting(false);
-    }
-  }, [selectedProjects, entities, importedAssets, companyId, api, refreshImportedAssets, onImportSuccess]);
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    resetPage();
+  }, [resetPage]);
 
   const handleRefreshImportedAssets = useCallback(async () => {
     if (!companyId) {
-      setErrorMessage('Company ID not found. Please configure the integration first.');
       return;
     }
 
     try {
       await refreshImportedAssets(companyId);
-      setSuccessMessage('Imported assets list refreshed!');
     } catch (e: any) {
-      setErrorMessage('Failed to refresh imported assets: ' + (e?.message || 'Unknown error'));
     }
   }, [companyId, refreshImportedAssets]);
 
-  const error = errorMessage || entitiesError || assetsError;
+  const loading = entitiesLoading || assetsLoading;
+  const error = importError || entitiesError || assetsError;
+  const successMessage = importSuccess;
 
   return (
     <>
@@ -175,12 +100,12 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
         <div>
           <Button
             variant="outlined"
-            onClick={handleSelectAll}
+            onClick={selectAll}
             disabled={loading || importing || entities.length === 0 || autoImportEnabled}
             title={autoImportEnabled ? "Disable Automatic Import to enable manual import" : ""}
             className="conviso-button-secondary"
           >
-            {selectedProjects.size === entities.length ? 'Deselect All' : 'Select All'}
+            {isAllSelected ? 'Deselect All' : 'Select All'}
           </Button>
           <Button
             variant="outlined"
@@ -225,7 +150,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
         </Grid>
         <Grid item>
           <InfoCard 
-            title={`Available Components (${entities.length})`}
+            title={`Available Components (${filteredEntities.length})`}
             className="conviso-info-card"
           >
             {loading ? (
@@ -233,14 +158,40 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             ) : entities.length === 0 ? (
               <Typography variant="body1">No components found in the catalog.</Typography>
             ) : (
-              <ProjectTable
-                entities={entities}
-                selectedProjects={selectedProjects}
-                importedAssets={importedAssets}
-                autoImportEnabled={autoImportEnabled}
-                onToggleProject={handleToggleProject}
-                onSelectAll={handleSelectAll}
-              />
+              <>
+                <Grid item xs={12} style={{ marginBottom: '16px' }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search by name, description, or owner..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                    variant="outlined"
+                    size="small"
+                  />
+                </Grid>
+                <ProjectTable
+                  entities={paginatedEntities}
+                  selectedProjects={selectedProjects}
+                  importedAssets={importedAssets}
+                  autoImportEnabled={autoImportEnabled}
+                  onToggleProject={toggleProject}
+                  onSelectAll={selectAllVisible}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  totalCount={totalCount}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
+                  isAllVisibleSelected={isAllVisibleSelected}
+                  isSomeVisibleSelected={isSomeVisibleSelected}
+                />
+              </>
             )}
           </InfoCard>
         </Grid>

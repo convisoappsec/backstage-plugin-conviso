@@ -41,7 +41,6 @@ export function createAutoImportRoutes(
             });
           }
         } catch {
-          // Continue anyway - the setting is saved in memory
         }
       }
 
@@ -55,14 +54,12 @@ export function createAutoImportRoutes(
               currentCompanyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
             }
           } catch {
-            // Could not fetch companyId from integration endpoint
           }
         }
 
         if (currentCompanyId) {
           setTimeout(() => {
             autoImportService.checkAndImportNewEntities().catch(() => {
-              // Error in immediate auto-import check
             });
           }, 1000);
         }

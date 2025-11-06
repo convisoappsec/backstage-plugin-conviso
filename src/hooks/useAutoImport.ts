@@ -20,7 +20,6 @@ export function useAutoImport(instanceId: string, companyId?: number) {
             setAutoImportEnabled(result.integration.autoImportEnabled);
           }
         } catch {
-          // Fallback to backend endpoint
         }
       }
 
@@ -28,7 +27,6 @@ export function useAutoImport(instanceId: string, companyId?: number) {
         const setting = await api.getAutoImport(instanceId);
         setAutoImportEnabled(setting.enabled);
       } catch {
-        // Could not load auto-import setting
       }
     };
 
@@ -40,7 +38,6 @@ export function useAutoImport(instanceId: string, companyId?: number) {
     
     if (instanceId) {
       api.setAutoImport(instanceId, autoImportEnabled, companyId).catch(() => {
-        // Failed to update auto-import setting
       });
     }
   }, [autoImportEnabled, instanceId, companyId, api]);

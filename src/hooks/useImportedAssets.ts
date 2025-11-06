@@ -32,7 +32,6 @@ export function useImportedAssets(companyId: number | null) {
   useEffect(() => {
     if (companyId) {
       refreshImportedAssets(companyId).catch(() => {
-        // Error handled by state
       });
     }
   }, [companyId, refreshImportedAssets]);
