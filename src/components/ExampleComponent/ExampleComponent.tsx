@@ -23,7 +23,7 @@ export const ExampleComponent = () => (
         <Typography variant="body1">
           This plugin allows you to sync your Backstage catalog projects with Conviso Platform as security assets.
         </Typography>
-        <Typography variant="body2" style={{ marginTop: 16 }}>
+        <Typography variant="body2">
           Features:
         </Typography>
         <ul>

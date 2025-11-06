@@ -6,7 +6,6 @@ import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import { useAutoImport } from '../../hooks/useAutoImport';
 import { useEntities } from '../../hooks/useEntities';
 import { useImportedAssets } from '../../hooks/useImportedAssets';
-import '../../styles/conviso-theme.css';
 import { getEntityId, mapEntityToProject } from '../../utils/mappers';
 import { normalizeName } from '../../utils/nameNormalizer';
 import { AutoImportToggle } from '../AutoImportToggle';
@@ -53,12 +52,26 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
   }, []);
 
   const handleSelectAll = useCallback(() => {
-    if (selectedProjects.size === entities.length) {
+    // Filtra apenas itens não importados
+    const nonImportedEntities = entities.filter(e => {
+      const name = normalizeName(e.metadata.name);
+      return !importedAssets.has(name);
+    });
+    
+    const nonImportedIds = new Set(nonImportedEntities.map(e => getEntityId(e)));
+    
+    // Verifica se todos os não importados estão selecionados
+    const allNonImportedSelected = nonImportedIds.size > 0 && 
+      Array.from(nonImportedIds).every(id => selectedProjects.has(id));
+    
+    if (allNonImportedSelected) {
+      // Desmarca todos os não importados
       setSelectedProjects(new Set());
     } else {
-      setSelectedProjects(new Set(entities.map(e => getEntityId(e))));
+      // Seleciona todos os não importados
+      setSelectedProjects(nonImportedIds);
     }
-  }, [selectedProjects.size, entities]);
+  }, [selectedProjects, entities, importedAssets]);
 
   const handleImport = useCallback(async () => {
     if (selectedProjects.size === 0) {
@@ -159,7 +172,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
   return (
     <>
       <ContentHeader title="Select Projects">
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div>
           <Button
             variant="outlined"
             onClick={handleSelectAll}
@@ -184,14 +197,6 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             disabled={loading || importing || selectedProjects.size === 0 || autoImportEnabled}
             title={autoImportEnabled ? "Disable Automatic Import to enable manual import" : ""}
             className="conviso-button-primary"
-            style={{
-              backgroundColor: '#2c3e50',
-              color: '#ffffff',
-              fontWeight: 600,
-              padding: '10px 24px',
-              borderRadius: '6px',
-              boxShadow: '0 2px 4px rgba(44, 62, 80, 0.2)',
-            }}
           >
             Import Selected ({selectedProjects.size})
           </Button>
@@ -206,7 +211,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
         {successMessage && (
           <Grid item>
             <div className="conviso-success-message">
-              <Typography variant="body2" style={{ color: '#0a2540', fontWeight: 600 }}>
+              <Typography variant="body2">
                 {successMessage}
               </Typography>
             </div>

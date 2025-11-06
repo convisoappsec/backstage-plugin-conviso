@@ -3,7 +3,6 @@ import { useApi } from '@backstage/core-plugin-api';
 import { Button, Grid, Tab, Tabs, Typography } from '@material-ui/core';
 import { useEffect, useMemo, useState } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
-import '../../styles/conviso-theme.css';
 import { ProjectSelector } from '../ProjectSelector';
 
 function generateInstanceId(): string {
@@ -122,31 +121,20 @@ export const ConvisoPlatformConfig = () => {
         <HeaderLabel label="Lifecycle" value="Alpha" />
       </Header>
       <Content>
-        <div style={{ marginBottom: 24 }}>
+        <div>
           <Tabs 
             value={activeTab} 
             onChange={(_, newValue) => setActiveTab(newValue)}
             className="conviso-tabs"
-            style={{ borderBottom: '2px solid #e0e0e0' }}
           >
             <Tab 
               label="Configure Integration" 
               className="conviso-tab"
-              style={{ 
-                color: activeTab === 0 ? '#0a2540' : '#666666',
-                fontWeight: activeTab === 0 ? 700 : 500,
-                borderBottom: activeTab === 0 ? '3px solid #FFB800' : 'none'
-              }}
             />
             {integration && (
               <Tab 
                 label="Import Projects" 
                 className="conviso-tab"
-                style={{ 
-                  color: activeTab === 1 ? '#0a2540' : '#666666',
-                  fontWeight: activeTab === 1 ? 700 : 500,
-                  borderBottom: activeTab === 1 ? '3px solid #FFB800' : 'none'
-                }}
               />
             )}
           </Tabs>
@@ -185,14 +173,6 @@ export const ConvisoPlatformConfig = () => {
                       className="conviso-button-primary"
                       onClick={handleCreateIntegration}
                       disabled={submitting}
-                      style={{
-                        backgroundColor: '#2c3e50',
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        padding: '10px 24px',
-                        borderRadius: '6px',
-                        boxShadow: '0 2px 4px rgba(44, 62, 80, 0.2)',
-                      }}
                     >
                       Create / Update Integration
                     </Button>

@@ -21,14 +21,23 @@ export function ProjectTable({
   onToggleProject,
   onSelectAll,
 }: ProjectTableProps) {
+  // Calcula apenas itens não importados uma vez
+  const nonImportedEntities = entities.filter(e => {
+    const name = normalizeName(e.metadata.name);
+    return !importedAssets.has(name);
+  });
+  const nonImportedCount = nonImportedEntities.length;
+  const allNonImportedSelected = nonImportedCount > 0 && selectedProjects.size === nonImportedCount;
+  const someNonImportedSelected = selectedProjects.size > 0 && selectedProjects.size < nonImportedCount;
+
   return (
-    <Table className="conviso-table">
+    <Table className={`conviso-table ${autoImportEnabled ? 'conviso-table-disabled' : ''}`}>
       <TableHead>
         <TableRow className="conviso-table-header">
           <TableCell padding="checkbox">
             <Checkbox
-              checked={selectedProjects.size === entities.length && entities.length > 0}
-              indeterminate={selectedProjects.size > 0 && selectedProjects.size < entities.length}
+              checked={allNonImportedSelected}
+              indeterminate={someNonImportedSelected}
               onChange={onSelectAll}
               disabled={autoImportEnabled}
               title={autoImportEnabled ? "Disable Automatic Import to select projects manually" : ""}
@@ -52,27 +61,31 @@ export function ProjectTable({
           return (
             <TableRow 
               key={entityId} 
-              selected={isSelected}
-              className={`conviso-table-row ${isImported ? 'conviso-table-row-imported' : ''}`}
-              style={{ 
-                borderLeft: isImported ? '4px solid #FFB800' : 'none',
-              }}
+              selected={isSelected && !autoImportEnabled}
+              className={`conviso-table-row ${isImported ? 'conviso-table-row-imported' : ''} ${autoImportEnabled ? 'conviso-table-row-disabled' : ''} ${isSelected ? 'conviso-table-row-selected' : ''}`}
             >
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={isSelected}
-                  onChange={() => onToggleProject(entityId)}
+                  checked={isImported || isSelected}
+                  onChange={() => {
+                    // Não permite desmarcar se estiver importado
+                    if (!isImported) {
+                      onToggleProject(entityId);
+                    }
+                  }}
                   disabled={isImported || autoImportEnabled}
-                  title={autoImportEnabled ? "Disable Automatic Import to select projects manually" : ""}
+                  title={
+                    isImported 
+                      ? "This project is already imported and cannot be unselected"
+                      : autoImportEnabled 
+                        ? "Disable Automatic Import to select projects manually" 
+                        : ""
+                  }
+                  className={isImported ? 'conviso-checkbox-imported' : isSelected ? 'conviso-checkbox-selected' : ''}
                 />
               </TableCell>
               <TableCell>
-                <Typography 
-                  variant="body2" 
-                  style={{ 
-                    fontWeight: isImported ? 'normal' : 'medium',
-                  }}
-                >
+                <Typography variant="body2">
                   {entity.metadata.name}
                 </Typography>
               </TableCell>
