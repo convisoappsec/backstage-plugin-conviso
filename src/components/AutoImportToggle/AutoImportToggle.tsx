@@ -27,7 +27,7 @@ export function AutoImportToggle({ enabled, onChange }: AutoImportToggleProps) {
             </Typography>
           }
         />
-        <Typography variant="body2" display="block">
+        <Typography variant="body2" component="div">
           When enabled, new components created in Backstage will be automatically imported to Conviso Platform as security assets. The import process runs in the background and does not require you to be on this page.
           {enabled && (
             <div>

@@ -41,8 +41,30 @@ export function useEntities() {
         if (validEntities.length === 0) {
           setError('No components found in the catalog. Make sure you have components registered in Backstage.');
         }
-      } catch (e: any) {
-        setError(`Failed to load entities: ${e?.message || 'Unknown error'}.`);
+      } catch (e: unknown) {
+        let errorMessage = 'Failed to load entities';
+        
+        if (e instanceof Error) {
+          const message = e.message.toLowerCase();
+          
+          if (message.includes('failed to fetch') || message.includes('network error')) {
+            errorMessage = 'Failed to load entities: Network error. Please check if the Backstage backend is running and accessible.';
+          } else if (message.includes('unauthorized') || message.includes('401')) {
+            errorMessage = 'Failed to load entities: Authentication error. Please refresh the page and try again.';
+          } else if (message.includes('forbidden') || message.includes('403')) {
+            errorMessage = 'Failed to load entities: Access denied. Please check your permissions.';
+          } else {
+            errorMessage = `Failed to load entities: ${e.message}`;
+          }
+        } else if (typeof e === 'string') {
+          errorMessage = `Failed to load entities: ${e}`;
+        } else if (e && typeof e === 'object' && 'message' in e) {
+          errorMessage = `Failed to load entities: ${String(e.message)}`;
+        } else {
+          errorMessage = 'Failed to load entities: Unknown error. Please check your Backstage catalog configuration and network connection.';
+        }
+        
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

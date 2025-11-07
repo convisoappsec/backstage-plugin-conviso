@@ -18,7 +18,9 @@ export class ConvisoApiService {
       throw new Error('API Key not configured. Set CONVISO_API_KEY in .env file.');
     }
 
-    const response = await fetch(`${this.config.apiBase}/graphql`, {
+    const url = `${this.config.apiBase}/graphql`;
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,9 +30,30 @@ export class ConvisoApiService {
       body: JSON.stringify(request),
     });
 
+    const contentType = response.headers.get('content-type');
+    const isJson = contentType?.includes('application/json');
+
     if (!response.ok) {
       const errorText = await response.text();
+      
+      if (!isJson) {
+        throw new Error(
+          `GraphQL request failed (${response.status} ${response.statusText}). ` +
+          `Expected JSON but received ${contentType || 'unknown'}. ` +
+          `URL: ${url}. ` +
+          `Response preview: ${errorText.substring(0, 200)}...`
+        );
+      }
+      
       throw new Error(`GraphQL request failed: ${errorText}`);
+    }
+
+    if (!isJson) {
+      const errorText = await response.text();
+      throw new Error(
+        `GraphQL response is not JSON. Content-Type: ${contentType || 'unknown'}. ` +
+        `Response preview: ${errorText.substring(0, 200)}...`
+      );
     }
 
     const json: GraphQLResponse<T> = await response.json();

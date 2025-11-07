@@ -1,6 +1,6 @@
+import { useApi } from '@backstage/core-plugin-api';
 import { useCallback, useState } from 'react';
 import { convisoPlatformApiRef } from '../api/convisoPlatformApi';
-import { useApi } from '@backstage/core-plugin-api';
 import { BackstageEntity } from '../types/entity.types';
 import { getEntityId, mapEntityToProject } from '../utils/mappers';
 import { normalizeName } from '../utils/nameNormalizer';
@@ -76,7 +76,9 @@ export function useProjectImport({
       });
 
       if (result.success) {
-        setSuccessMessage(`Successfully imported ${result.importedCount} project(s)!`);
+        setSuccessMessage(
+          `Import job started successfully! Projects are being processed asynchronously.`
+        );
         
         if (onSelectionCleared) {
           onSelectionCleared();
@@ -87,7 +89,7 @@ export function useProjectImport({
         }
       } else {
         setErrorMessage(
-          `Imported ${result.importedCount} project(s), but encountered errors: ${result.errors?.join(', ') || 'Unknown errors'}`
+          `Failed to start import job: ${result.errors?.join(', ') || 'Unknown errors'}`
         );
       }
     } catch (e: any) {

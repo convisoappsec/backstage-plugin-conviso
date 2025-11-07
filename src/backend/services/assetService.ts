@@ -1,3 +1,5 @@
+import { ASSET_TYPES, INTEGRATION_TYPES, PAGINATION } from '../constants';
+import { normalizeEntityName } from '../utils/nameNormalizer';
 import { ConvisoApiService } from './convisoApiService';
 
 export interface ImportedAsset {
@@ -29,7 +31,7 @@ export class AssetService {
     const allAssets: ImportedAsset[] = [];
     let page = 1;
     let hasMore = true;
-    const limit = 100;
+    const limit = PAGINATION.DEFAULT_LIMIT;
 
     while (hasMore) {
       const data = await this.apiService.request<{
@@ -47,7 +49,7 @@ export class AssetService {
           page,
           limit,
           search: {
-            integrationTypes: ['BACKSTAGE'],
+            integrationTypes: [INTEGRATION_TYPES.BACKSTAGE.toUpperCase()],
           },
         },
       });
@@ -71,7 +73,7 @@ export class AssetService {
       const importedNames = new Set<string>();
 
       assets.forEach((asset) => {
-        const normalized = asset.name.toLowerCase().trim().replace(/\s+/g, ' ');
+        const normalized = normalizeEntityName(asset.name);
         importedNames.add(normalized);
       });
 
@@ -99,45 +101,66 @@ export class AssetService {
     importedCount: number;
     errors?: string[];
   }> {
-    const mutation = `
-      mutation ImportBackstageProjectsToAssets($input: ImportBackstageProjectsToAssetsInput!) {
-        importBackstageProjectsToAssets(input: $input) {
-          success
-          importedCount
-          errors
-        }
-      }
-    `;
+    const results = await Promise.all(
+      input.projects.map((project) => {
+        const mutation = `
+          mutation ImportAssetToIntegration($input: ImportAssetToIntegrationInput!) {
+            importAssetToIntegration(input: $input) {
+              success
+              importedCount
+              errors
+            }
+          }
+        `;
 
-    const mutationVariables = {
-      input: {
-        companyId: input.companyId.toString(),
-        projects: input.projects.map((p) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description || '',
-          url: p.url || '',
-          repoUrl: p.repoUrl || '',
-          lifecycle: p.lifecycle || '',
-          tags: p.tags || [],
-          owner: p.owner || '',
-          assetType: p.assetType || 'api',
-        })),
-      },
+        return this.apiService.request<{
+          importAssetToIntegration: {
+            success: boolean;
+            importedCount: number;
+            errors?: string[];
+          };
+        }>({
+          query: mutation,
+          variables: {
+            input: {
+              companyId: input.companyId.toString(),
+              integrationType: INTEGRATION_TYPES.BACKSTAGE,
+              project: {
+                id: project.id,
+                name: project.name,
+                description: project.description || '',
+                url: project.url || '',
+                repoUrl: project.repoUrl || '',
+                lifecycle: project.lifecycle || '',
+                tags: project.tags || [],
+                owner: project.owner || '',
+                assetType: project.assetType || ASSET_TYPES.API,
+              },
+            },
+          },
+        });
+      })
+    );
+
+    const totalImported = results.reduce((sum, result) => sum + result.importAssetToIntegration.importedCount, 0);
+    const allErrors = results
+      .flatMap((result) => result.importAssetToIntegration.errors || [])
+      .filter(Boolean);
+
+    const response: {
+      success: boolean;
+      importedCount: number;
+      errors?: string[];
+    } = {
+      success: allErrors.length === 0,
+      importedCount: totalImported,
     };
 
-    const data = await this.apiService.request<{
-      importBackstageProjectsToAssets: {
-        success: boolean;
-        importedCount: number;
-        errors?: string[];
-      };
-    }>({
-      query: mutation,
-      variables: mutationVariables,
-    });
+    if (allErrors.length > 0) {
+      response.errors = allErrors;
+    }
 
-    return data.importBackstageProjectsToAssets;
+    return response;
   }
 }
 
