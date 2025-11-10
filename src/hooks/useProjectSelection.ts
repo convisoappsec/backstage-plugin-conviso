@@ -29,6 +29,9 @@ export function useProjectSelection({
   const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
 
   const nonImportedEntities = useMemo(() => {
+    if (importedAssets.size === 0) {
+      return entities;
+    }
     return entities.filter(e => {
       const name = normalizeName(e.metadata.name);
       return !importedAssets.has(name);
@@ -52,8 +55,16 @@ export function useProjectSelection({
   }, [visibleNonImportedEntities]);
 
   const isAllSelected = useMemo(() => {
-    return nonImportedIds.size > 0 && 
-      Array.from(nonImportedIds).every(id => selectedProjects.has(id));
+    if (nonImportedIds.size === 0) return false;
+    if (selectedProjects.size === 0) return false;
+    if (selectedProjects.size < nonImportedIds.size) return false;
+    
+    for (const id of nonImportedIds) {
+      if (!selectedProjects.has(id)) {
+        return false;
+      }
+    }
+    return true;
   }, [nonImportedIds, selectedProjects]);
 
   const isAllVisibleSelected = useMemo(() => {

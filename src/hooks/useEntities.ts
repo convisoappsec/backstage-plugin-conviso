@@ -10,6 +10,8 @@ export function useEntities() {
   const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
+    let cancelled = false;
+    
     async function fetchEntities() {
       try {
         setLoading(true);
@@ -32,16 +34,28 @@ export function useEntities() {
           ],
         });
         
-        const validEntities = response.items.filter((item: any) => {
+        if (cancelled) {
+          return;
+        }
+        
+        const validEntities = response.items?.filter((item: any) => {
           return item.kind === 'Component' && item.metadata?.name;
-        }) as BackstageEntity[];
+        }) as BackstageEntity[] || [];
         
         setEntities(validEntities);
         
         if (validEntities.length === 0) {
-          setError('No components found in the catalog. Make sure you have components registered in Backstage.');
+          const errorMsg = 'No components found in the catalog. ' +
+            'The catalog may still be processing entities. ' +
+            'Please wait a few minutes and refresh the page, or check the Backstage catalog configuration.';
+          setError(errorMsg);
+          console.warn('[useEntities]', errorMsg);
         }
       } catch (e: unknown) {
+        if (cancelled) {
+          return;
+        }
+        
         let errorMessage = 'Failed to load entities';
         
         if (e instanceof Error) {
@@ -64,13 +78,20 @@ export function useEntities() {
           errorMessage = 'Failed to load entities: Unknown error. Please check your Backstage catalog configuration and network connection.';
         }
         
+        console.error('[useEntities] Error fetching entities:', e);
         setError(errorMessage);
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
     
     fetchEntities();
+    
+    return () => {
+      cancelled = true;
+    };
   }, [catalogApi]);
 
   return {

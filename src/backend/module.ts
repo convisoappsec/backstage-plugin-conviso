@@ -42,11 +42,6 @@ export const convisoBackendPlugin = createBackendPlugin({
         router.use(createAutoImportRoutes(integrationService, autoImportService, config));
         router.use(createImportRoutes(assetService, config));
 
-        const pollingInterval =
-          config.environment === 'production'
-            ? POLLING_INTERVALS.PRODUCTION_MS
-            : POLLING_INTERVALS.DEVELOPMENT_MS;
-
         const runPollingCycle = async () => {
           try {
             const result = await autoImportService.checkAndImportNewEntities();
@@ -66,13 +61,32 @@ export const convisoBackendPlugin = createBackendPlugin({
           }
         };
 
-        setTimeout(() => {
-          runPollingCycle();
-        }, POLLING_INTERVALS.INITIAL_DELAY_MS);
+        const scheduleDailyAt1AM = () => {
+          const now = new Date();
+          const next1AM = new Date();
+          next1AM.setHours(1, 0, 0, 0);
 
-        setInterval(() => {
-          runPollingCycle();
-        }, pollingInterval);
+          if (now.getHours() >= 1) {
+            next1AM.setDate(next1AM.getDate() + 1);
+          }
+
+          const msUntil1AM = next1AM.getTime() - now.getTime();
+
+          logger.info('Scheduling auto-import to run daily at 1:00 AM', {
+            nextRun: next1AM.toISOString(),
+            msUntilNextRun: msUntil1AM,
+          });
+
+          setTimeout(() => {
+            runPollingCycle();
+
+            setInterval(() => {
+              runPollingCycle();
+            }, POLLING_INTERVALS.PRODUCTION_MS);
+          }, msUntil1AM);
+        };
+
+        scheduleDailyAt1AM();
 
         httpRouter.use(router);
       },

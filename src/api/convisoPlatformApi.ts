@@ -79,6 +79,10 @@ export interface GetIntegrationResult {
   companyId?: number;
 }
 
+export interface CheckImportedNamesResult {
+  importedNames: string[];
+}
+
 export interface ConvisoPlatformApi {
   createOrUpdateBackstageIntegration(
     input: CreateOrUpdateBackstageIntegrationInput
@@ -90,6 +94,7 @@ export interface ConvisoPlatformApi {
   setAutoImport(instanceId: string, enabled: boolean, companyId?: number): Promise<{ success: boolean; enabled: boolean }>;
   getAutoImport(instanceId: string): Promise<AutoImportSetting>;
   getImportedAssets(companyId: number): Promise<ImportedAssetsResult>;
+  checkImportedAssetNames(companyId: number, names: string[]): Promise<CheckImportedNamesResult>;
 }
 
 export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
@@ -237,6 +242,31 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to get imported assets');
+    }
+
+    const json = await response.json();
+    return json;
+  }
+
+  async checkImportedAssetNames(companyId: number, names: string[]): Promise<CheckImportedNamesResult> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('backend');
+    const backendBaseUrl = baseUrl.replace('/api/backend', '');
+    const url = `${backendBaseUrl}/api/conviso/check-imported-names`;
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        companyId,
+        names,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to check imported asset names');
     }
 
     return await response.json();

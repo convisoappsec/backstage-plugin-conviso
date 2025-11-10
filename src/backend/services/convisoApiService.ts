@@ -11,6 +11,8 @@ interface GraphQLResponse<T = any> {
 }
 
 export class ConvisoApiService {
+  private readonly REQUEST_TIMEOUT_MS = 120000;
+
   constructor(private config: ConvisoConfig) {}
 
   async request<T = any>(request: GraphQLRequest): Promise<T> {
@@ -19,54 +21,72 @@ export class ConvisoApiService {
     }
 
     const url = `${this.config.apiBase}/graphql`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.REQUEST_TIMEOUT_MS);
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': this.config.apiKey,
-        'skip_zrok_interstitial': '1',
-      },
-      body: JSON.stringify(request),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': this.config.apiKey,
+          'skip_zrok_interstitial': '1',
+        },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
 
-    const contentType = response.headers.get('content-type');
-    const isJson = contentType?.includes('application/json');
+      clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType?.includes('application/json');
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        
+        if (!isJson) {
+          throw new Error(
+            `GraphQL request failed (${response.status} ${response.statusText}). ` +
+            `Expected JSON but received ${contentType || 'unknown'}. ` +
+            `URL: ${url}. ` +
+            `Response preview: ${errorText.substring(0, 200)}...`
+          );
+        }
+        
+        throw new Error(`GraphQL request failed: ${errorText}`);
+      }
+
       if (!isJson) {
+        const errorText = await response.text();
         throw new Error(
-          `GraphQL request failed (${response.status} ${response.statusText}). ` +
-          `Expected JSON but received ${contentType || 'unknown'}. ` +
-          `URL: ${url}. ` +
+          `GraphQL response is not JSON. Content-Type: ${contentType || 'unknown'}. ` +
           `Response preview: ${errorText.substring(0, 200)}...`
         );
       }
+
+      const json: GraphQLResponse<T> = await response.json();
+
+      if (json.errors) {
+        throw new Error(json.errors[0]?.message || 'GraphQL error');
+      }
+
+      if (!json.data) {
+        throw new Error('No data in GraphQL response');
+      }
+
+      return json.data;
+    } catch (error: unknown) {
+      clearTimeout(timeoutId);
       
-      throw new Error(`GraphQL request failed: ${errorText}`);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(
+          `GraphQL request timeout after ${this.REQUEST_TIMEOUT_MS}ms. ` +
+          `URL: ${url}. This may indicate a network issue or the server is taking too long to respond.`
+        );
+      }
+      
+      throw error;
     }
-
-    if (!isJson) {
-      const errorText = await response.text();
-      throw new Error(
-        `GraphQL response is not JSON. Content-Type: ${contentType || 'unknown'}. ` +
-        `Response preview: ${errorText.substring(0, 200)}...`
-      );
-    }
-
-    const json: GraphQLResponse<T> = await response.json();
-
-    if (json.errors) {
-      throw new Error(json.errors[0]?.message || 'GraphQL error');
-    }
-
-    if (!json.data) {
-      throw new Error('No data in GraphQL response');
-    }
-
-    return json.data;
   }
 }
 

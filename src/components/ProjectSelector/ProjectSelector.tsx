@@ -1,5 +1,5 @@
 import { ContentHeader, InfoCard, Progress, WarningPanel } from '@backstage/core-components';
-import { Button, Grid, InputAdornment, TextField, Typography } from '@material-ui/core';
+import { Button, CircularProgress, Grid, InputAdornment, TextField, Typography } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { useCallback, useMemo, useState } from 'react';
 import { useAutoImport } from '../../hooks/useAutoImport';
@@ -28,6 +28,8 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     error: assetsError,
     refreshImportedAssets,
   } = useImportedAssets(companyId);
+
+  const [refreshSuccess, setRefreshSuccess] = useState<string | undefined>();
 
   const instanceId = useMemo(() => localStorage.getItem('conviso_backstage_instance_id') || '', []);
   const { autoImportEnabled, setAutoImportEnabled } = useAutoImport(instanceId, companyId || undefined);
@@ -79,18 +81,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     resetPage();
   }, [resetPage]);
 
-  const handleRefreshImportedAssets = useCallback(async () => {
-    if (!companyId) {
-      return;
-    }
-
-    try {
-      await refreshImportedAssets(companyId);
-    } catch (e: any) {
-    }
-  }, [companyId, refreshImportedAssets]);
-
-  const loading = entitiesLoading || assetsLoading;
+  const loading = entitiesLoading;
   const error = importError || entitiesError || assetsError;
   const successMessage = importSuccess;
 
@@ -109,12 +100,24 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
           </Button>
           <Button
             variant="outlined"
-            onClick={handleRefreshImportedAssets}
-            disabled={loading || importing}
-            title="Refresh the list of imported assets from Conviso Platform"
+            onClick={async () => {
+              if (!companyId) return;
+              try {
+                setRefreshSuccess(undefined);
+                const result = await refreshImportedAssets(companyId, true);
+                setRefreshSuccess(`Successfully refreshed! Found ${result.size} imported asset${result.size !== 1 ? 's' : ''}.`);
+                setTimeout(() => setRefreshSuccess(undefined), 5000);
+              } catch (e: any) {
+                console.error('[ProjectSelector] Refresh failed:', e);
+                setRefreshSuccess(undefined);
+              }
+            }}
+            disabled={assetsLoading || importing || !companyId}
+            title={assetsLoading ? "Refreshing the list of imported assets. This may take a few minutes..." : "Refresh the list of imported assets from Conviso Platform"}
             className="conviso-button-secondary"
+            startIcon={assetsLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
-            Refresh Status
+            {assetsLoading ? 'Refreshing...' : 'Refresh Status'}
           </Button>
           <Button
             variant="contained"
@@ -138,6 +141,15 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             <div className="conviso-success-message">
               <Typography variant="body2">
                 {successMessage}
+              </Typography>
+            </div>
+          </Grid>
+        )}
+        {refreshSuccess && (
+          <Grid item>
+            <div className="conviso-success-message">
+              <Typography variant="body2" style={{ color: '#4caf50' }}>
+                {refreshSuccess}
               </Typography>
             </div>
           </Grid>

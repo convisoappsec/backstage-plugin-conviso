@@ -9,8 +9,9 @@ export function createImportRoutes(
   const router = express.Router();
 
   router.get('/imported-assets/:companyId?', async (req, res) => {
+    const companyIdFromParam = req.params.companyId;
+    
     try {
-      const companyIdFromParam = req.params.companyId;
       const companyId = companyIdFromParam 
         ? parseInt(companyIdFromParam, 10)
         : config.companyId;
@@ -32,6 +33,38 @@ export function createImportRoutes(
           id: asset.id,
           name: asset.name,
         })),
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+  });
+
+  router.post('/check-imported-names', async (req, res) => {
+    try {
+      const { companyId: companyIdFromBody, names } = req.body;
+
+      if (!names || !Array.isArray(names)) {
+        return res.status(400).json({ error: 'names array is required' });
+      }
+
+      const companyId = companyIdFromBody 
+        ? parseInt(companyIdFromBody.toString(), 10)
+        : config.companyId;
+
+      if (!companyId) {
+        return res.status(400).json({ 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the request body.' 
+        });
+      }
+
+      if (!config.apiKey) {
+        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY in .env file.' });
+      }
+
+      const foundNames = await assetService.checkImportedAssetNames(companyId, names);
+
+      return res.json({
+        importedNames: Array.from(foundNames),
       });
     } catch (error: any) {
       return res.status(500).json({ error: error.message || 'Internal server error' });
