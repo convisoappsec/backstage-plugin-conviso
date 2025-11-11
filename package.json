@@ -16,20 +16,20 @@
   "license": "Apache-2.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./backend": {
-      "types": "./src/backend/index.ts",
-      "default": "./src/backend/index.ts"
-    }
-  },
   "publishConfig": {
     "access": "public",
     "main": "dist/index.esm.js",
-    "types": "dist/index.d.ts"
+    "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.esm.js"
+      },
+      "./backend": {
+        "types": "./dist/backend/index.d.ts",
+        "default": "./dist/backend/index.esm.js"
+      }
+    }
   },
   "backstage": {
     "role": "frontend-plugin",
