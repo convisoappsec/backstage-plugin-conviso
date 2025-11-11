@@ -1,0 +1,64 @@
+# Development files
+.dev/
+dev/
+*.log
+*.local
+
+# Testing
+coverage/
+.nyc_output/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+**/__tests__/
+**/__mocks__/
+
+# Build artifacts (keep dist/)
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (keep README.md and LICENSE)
+docs/
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Config files
+.eslintrc*
+.prettierrc*
+jest.config.*
+tsconfig.json
+tsconfig.*.json
+
+# Source files (only dist/ should be published)
+src/
+!src/index.ts
+!src/backend/index.ts
+
+# Examples
+examples/
+*.example
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+

@@ -148,3 +148,8 @@ dist-types/
 playwright-report/
 test-results/
 .turbo/
+
+# Plugin-specific cache files
+imported-assets-cache.json
+**/imported-assets-cache.json
+*.cache.json
