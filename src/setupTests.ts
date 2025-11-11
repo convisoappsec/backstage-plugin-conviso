@@ -1,5 +1,16 @@
 import '@testing-library/jest-dom';
 
+if (typeof global.setImmediate === 'undefined') {
+  const setImmediatePolyfill = (callback: (...args: any[]) => void, ...args: any[]) => {
+    return setTimeout(() => callback(...args), 0);
+  };
+  (setImmediatePolyfill as any).__promisify__ = undefined;
+  global.setImmediate = setImmediatePolyfill as unknown as typeof setImmediate;
+  global.clearImmediate = ((id: any) => {
+    clearTimeout(id);
+  }) as unknown as typeof clearImmediate;
+}
+
 if (typeof global.TextEncoder === 'undefined') {
   const { TextEncoder, TextDecoder } = require('util');
   global.TextEncoder = TextEncoder;
