@@ -96,9 +96,13 @@ const originalError = console.error;
 
 beforeAll(() => {
   console.warn = (...args) => {
+    const message = typeof args[0] === 'string' ? args[0] : '';
+    // Suppress known warnings from dependencies
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      message.includes('Warning: ReactDOM.render is no longer supported') ||
+      message.includes('React Router Future Flag Warning') ||
+      message.includes('Support for defaultProps will be removed') ||
+      message.includes('findDOMNode is deprecated')
     ) {
       return;
     }
@@ -106,9 +110,12 @@ beforeAll(() => {
   };
 
   console.error = (...args) => {
+    const message = typeof args[0] === 'string' ? args[0] : '';
+    // Suppress known warnings from dependencies
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      message.includes('Warning: ReactDOM.render is no longer supported') ||
+      message.includes('Support for defaultProps will be removed') ||
+      message.includes('findDOMNode is deprecated')
     ) {
       return;
     }

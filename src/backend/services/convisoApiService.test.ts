@@ -25,6 +25,9 @@ describe('ConvisoApiService', () => {
     it('should make GraphQL request with correct headers', async () => {
       const mockResponse = {
         ok: true,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
         json: jest.fn().mockResolvedValue({
           data: { test: 'data' },
         }),
@@ -38,7 +41,7 @@ describe('ConvisoApiService', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         'https://api.test.convisoappsec.com/graphql',
-        {
+        expect.objectContaining({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -49,7 +52,8 @@ describe('ConvisoApiService', () => {
             query: 'query { test }',
             variables: { id: '123' },
           }),
-        }
+          signal: expect.any(AbortSignal),
+        })
       );
     });
 
@@ -57,6 +61,9 @@ describe('ConvisoApiService', () => {
       const mockData = { test: 'result' };
       mockFetch.mockResolvedValue({
         ok: true,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
         json: jest.fn().mockResolvedValue({
           data: mockData,
         }),
@@ -86,6 +93,10 @@ describe('ConvisoApiService', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
+        statusText: 'Internal Server Error',
+        headers: new Headers({
+          'content-type': 'text/plain',
+        }),
         text: jest.fn().mockResolvedValue('Internal Server Error'),
       });
 
@@ -93,12 +104,15 @@ describe('ConvisoApiService', () => {
         service.request({
           query: 'query { test }',
         })
-      ).rejects.toThrow('GraphQL request failed: Internal Server Error');
+      ).rejects.toThrow('GraphQL request failed (500 Internal Server Error)');
     });
 
     it('should throw error when GraphQL response contains errors', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
         json: jest.fn().mockResolvedValue({
           errors: [{ message: 'GraphQL error occurred' }],
         }),
@@ -114,6 +128,9 @@ describe('ConvisoApiService', () => {
     it('should throw error when response has no data', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
         json: jest.fn().mockResolvedValue({}),
       });
 

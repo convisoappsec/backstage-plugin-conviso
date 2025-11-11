@@ -89,7 +89,7 @@ describe('AssetService', () => {
         variables: {
           companyId: '123',
           page: 1,
-          limit: 100,
+          limit: 2000,
           search: {
             integrationTypes: ['BACKSTAGE'],
           },
@@ -137,7 +137,7 @@ describe('AssetService', () => {
   describe('importProjects', () => {
     it('should import projects successfully', async () => {
       mockApiService.request.mockResolvedValue({
-        importBackstageProjectsToAssets: {
+        importAssetToIntegration: {
           success: true,
           importedCount: 2,
           errors: [],
@@ -162,10 +162,11 @@ describe('AssetService', () => {
       expect(result.success).toBe(true);
       expect(result.importedCount).toBe(2);
       expect(mockApiService.request).toHaveBeenCalledWith({
-        query: expect.stringContaining('ImportBackstageProjectsToAssets'),
+        query: expect.stringContaining('ImportAssetToIntegration'),
         variables: {
           input: {
             companyId: '123',
+            integrationType: 'backstage',
             projects: [
               expect.objectContaining({
                 id: '1',
@@ -185,7 +186,7 @@ describe('AssetService', () => {
 
     it('should use default values for optional fields', async () => {
       mockApiService.request.mockResolvedValue({
-        importBackstageProjectsToAssets: {
+        importAssetToIntegration: {
           success: true,
           importedCount: 1,
         },
@@ -206,6 +207,7 @@ describe('AssetService', () => {
         variables: {
           input: {
             companyId: '123',
+            integrationType: 'backstage',
             projects: [
               expect.objectContaining({
                 description: '',
