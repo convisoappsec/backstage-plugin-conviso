@@ -95,6 +95,11 @@ export interface SyncImportedAssetsResult {
   duration: string;
 }
 
+export interface ConvisoConfigResult {
+  environment: string;
+  platformUrl: string;
+}
+
 export interface ConvisoPlatformApi {
   createOrUpdateBackstageIntegration(
     input: CreateOrUpdateBackstageIntegrationInput
@@ -110,6 +115,7 @@ export interface ConvisoPlatformApi {
   syncImportedAssets(companyId: number, force?: boolean): Promise<SyncImportedAssetsResult>;
   checkImportedAssetNames(companyId: number, names: string[]): Promise<CheckImportedNamesResult>;
   addImportedNames(companyId: number, names: string[]): Promise<{ success: boolean; added: number }>;
+  getConfig(): Promise<ConvisoConfigResult>;
 }
 
 export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
@@ -344,6 +350,21 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to add imported names to cache');
+    }
+
+    return await response.json();
+  }
+
+  async getConfig(): Promise<ConvisoConfigResult> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('backend');
+    const backendBaseUrl = baseUrl.replace('/api/backend', '');
+    const url = `${backendBaseUrl}/api/conviso/config`;
+    
+    const response = await this.fetchApi.fetch(url);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to get config');
     }
 
     return await response.json();

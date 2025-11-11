@@ -73,6 +73,19 @@ export function createIntegrationRoutes(
     }
   });
 
+  router.get('/config', async (req, res) => {
+    try {
+      return res.json({
+        environment: config.environment,
+        platformUrl: config.environment === 'staging' 
+          ? 'https://staging.convisoappsec.com/'
+          : 'https://app.convisoappsec.com/',
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+  });
+
   return router;
 }
 

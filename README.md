@@ -3,13 +3,13 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![npm version](https://img.shields.io/npm/v/@conviso/backstage-plugin-conviso)](https://www.npmjs.com/package/@conviso/backstage-plugin-conviso)
 
-Backstage plugin that enables seamless integration with [Conviso Platform](https://convisoappsec.com/). Sync catalog entities as security assets, manage environments, and view security insights without leaving Backstage.
+Backstage plugin for integration with [Conviso Platform](https://convisoappsec.com/). Import your Backstage catalog entities as assets in Conviso Platform.
 
 ## Features
 
-- 🔄 **Project Sync**: Import Backstage catalog projects as assets in Conviso Platform
+- 🔄 **Project Import**: Import Backstage catalog projects as assets in Conviso Platform
 - 🤖 **Auto-Import**: Automatically sync new entities from your Backstage catalog
-- 📊 **Asset Management**: View and manage imported assets with status tracking
+- 📊 **Status Tracking**: View which projects are imported and their status
 - 🔍 **Search & Filter**: Search projects by name, description, or owner
 - ⚡ **Performance**: Multi-layer caching system for fast operations
 - 🔐 **Security**: Secure API key authentication with Conviso Platform

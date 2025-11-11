@@ -1,6 +1,7 @@
 import { Content, Header, HeaderLabel, InfoCard, Page, Progress, WarningPanel } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
 import { Button, Grid, Tab, Tabs, Typography } from '@material-ui/core';
+import { OpenInNew } from '@material-ui/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import { ProjectSelector } from '../ProjectSelector';
@@ -18,6 +19,7 @@ export const ConvisoPlatformConfig = () => {
   const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
   const [integration, setIntegration] = useState<{ id: string; backstageUrl: string; instanceId: string; updatedAt: string } | null>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [platformUrl, setPlatformUrl] = useState<string>('https://app.convisoappsec.com/');
 
   const instanceId = useMemo(() => {
     const stored = localStorage.getItem('conviso_backstage_instance_id');
@@ -84,7 +86,17 @@ export const ConvisoPlatformConfig = () => {
       }
     }
     
+    async function loadConfig() {
+      try {
+        const config = await api.getConfig();
+        setPlatformUrl(config.platformUrl);
+      } catch (e: any) {
+        // Silently fail, use default production URL
+      }
+    }
+    
     checkIntegration();
+    loadConfig();
   }, [api, instanceId, backstageUrl]);
 
 
@@ -119,6 +131,15 @@ export const ConvisoPlatformConfig = () => {
       <Header title="Conviso" subtitle="Conviso Platform Integration">
         <HeaderLabel label="Owner" value="Conviso" />
         <HeaderLabel label="Lifecycle" value="Alpha" />
+        <a href={platformUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', marginLeft: '16px' }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<OpenInNew />}
+          >
+            Open Conviso Platform
+          </Button>
+        </a>
       </Header>
       <Content>
         <div>
