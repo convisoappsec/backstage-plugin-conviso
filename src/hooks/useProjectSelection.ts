@@ -58,13 +58,8 @@ export function useProjectSelection({
     if (nonImportedIds.size === 0) return false;
     if (selectedProjects.size === 0) return false;
     if (selectedProjects.size < nonImportedIds.size) return false;
-    
-    for (const id of nonImportedIds) {
-      if (!selectedProjects.has(id)) {
-        return false;
-      }
-    }
-    return true;
+    return nonImportedIds.size === selectedProjects.size && 
+           Array.from(nonImportedIds).every(id => selectedProjects.has(id));
   }, [nonImportedIds, selectedProjects]);
 
   const isAllVisibleSelected = useMemo(() => {

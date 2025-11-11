@@ -7,6 +7,7 @@ import { inMemoryStore } from '../store/inMemoryStore';
 import { BatchProcessor } from '../utils/batchProcessor';
 import { extractProjectDataFromEntity } from '../utils/entityMapper';
 import { normalizeEntityName } from '../utils/nameNormalizer';
+import { AssetCacheService } from './assetCacheService';
 import { AssetService } from './assetService';
 
 export interface AutoImportResult {
@@ -17,6 +18,7 @@ export interface AutoImportResult {
 export class AutoImportService {
   constructor(
     private assetService: AssetService,
+    private assetCacheService: AssetCacheService,
     private catalogApi: CatalogService,
     private auth: AuthService,
     private config: ConvisoConfig,
@@ -85,20 +87,30 @@ export class AutoImportService {
         companyId,
       });
 
-      const importedAssetNames = await this.assetService.getImportedAssetNames(companyId);
-      this.logger.info('Fetched imported asset names', {
-        instanceId,
-        companyId,
-        importedCount: importedAssetNames.size,
-      });
+      if (this.assetCacheService.isStale(companyId)) {
+        this.logger.info('Cache is stale, syncing before auto-import', {
+          instanceId,
+          companyId,
+        });
+        try {
+          await this.assetCacheService.sync(companyId, false);
+        } catch (error: unknown) {
+          const errorMsg = this.getErrorMessage(error, 'Error syncing cache');
+          this.logger.warn('Cache sync failed, continuing with auto-import', {
+            instanceId,
+            companyId,
+            error: errorMsg,
+          });
+        }
+      }
 
-      this.logger.info('Starting streaming import process', {
+      this.logger.info('Starting streaming import process with cache-based filtering', {
         instanceId,
         companyId,
         processingBatchSize: PAGINATION.PROCESSING_BATCH_SIZE,
       });
 
-      const importResult = await this.processEntitiesInBatches(companyId, importedAssetNames);
+      const importResult = await this.processEntitiesInBatches(companyId);
       
       this.logger.info('Streaming import completed', {
         instanceId,
@@ -123,8 +135,7 @@ export class AutoImportService {
 
 
   private async processEntitiesInBatches(
-    companyId: number,
-    importedAssetNames: Set<string>
+    companyId: number
   ): Promise<{ imported: number; errors: string[] }> {
     const processingBatchSize = PAGINATION.PROCESSING_BATCH_SIZE;
     const limit = PAGINATION.CATALOG_FETCH_LIMIT;
@@ -200,6 +211,21 @@ export class AutoImportService {
         break;
       }
 
+      const entityNames = batchEntities.map(entity => entity.metadata.name).filter((name): name is string => !!name);
+      
+      this.logger.info('Checking imported status for batch entities using cache', {
+        batchSize: batchEntities.length,
+        entityNamesCount: entityNames.length,
+      });
+      
+      const importedAssetNames = this.assetCacheService.checkNames(companyId, entityNames);
+      
+      this.logger.info('Fetched imported status for batch from cache', {
+        batchSize: batchEntities.length,
+        alreadyImported: importedAssetNames.size,
+        toImport: batchEntities.length - importedAssetNames.size,
+      });
+
       const nonImportedEntities = this.filterNonImportedEntities(batchEntities, importedAssetNames);
 
       this.logger.info('Filtered batch entities', {
@@ -217,6 +243,20 @@ export class AutoImportService {
         const importResult = await this.importEntities(nonImportedEntities, companyId);
         totalImported += importResult.imported;
         allErrors.push(...importResult.errors);
+
+        if (importResult.imported > 0) {
+          const importedNames = nonImportedEntities
+            .slice(0, importResult.imported)
+            .map(entity => entity.metadata.name)
+            .filter((name): name is string => !!name);
+          
+          this.assetCacheService.addNames(companyId, importedNames);
+          
+          this.logger.info('Updated cache with newly imported assets', {
+            companyId,
+            added: importedNames.length,
+          });
+        }
 
         this.logger.info('Batch import completed', {
           imported: importResult.imported,

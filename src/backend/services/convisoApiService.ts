@@ -11,7 +11,7 @@ interface GraphQLResponse<T = any> {
 }
 
 export class ConvisoApiService {
-  private readonly REQUEST_TIMEOUT_MS = 120000;
+  private readonly REQUEST_TIMEOUT_MS = 300000;
 
   constructor(private config: ConvisoConfig) {}
 

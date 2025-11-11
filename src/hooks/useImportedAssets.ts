@@ -1,13 +1,15 @@
 import { useApi } from '@backstage/core-plugin-api';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { convisoPlatformApiRef } from '../api/convisoPlatformApi';
 import { normalizeName } from '../utils/nameNormalizer';
 
-const CACHE_TTL_MS = 30 * 60 * 1000;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const LOCAL_STORAGE_KEY_PREFIX = 'conviso_imported_assets_';
 
-interface CacheEntry {
-  assets: Set<string>;
+interface LocalStorageCacheEntry {
+  assets: string[];
   timestamp: number;
+  lastSync: string;
 }
 
 export function useImportedAssets(companyId: number | null) {
@@ -15,53 +17,113 @@ export function useImportedAssets(companyId: number | null) {
   const [importedAssets, setImportedAssets] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const cacheRef = useRef<Map<number, CacheEntry>>(new Map());
 
-  const getCachedAssets = useCallback((id: number): Set<string> | null => {
-    const cached = cacheRef.current.get(id);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-      return cached.assets;
-    }
-    return null;
+  const getLocalStorageKey = useCallback((id: number): string => {
+    return `${LOCAL_STORAGE_KEY_PREFIX}${id}`;
   }, []);
 
-  const setCachedAssets = useCallback((id: number, assets: Set<string>): void => {
-    cacheRef.current.set(id, {
-      assets: new Set(assets),
-      timestamp: Date.now(),
-    });
-  }, []);
+  const getCachedAssetsFromLocalStorage = useCallback((id: number): Set<string> | null => {
+    try {
+      const key = getLocalStorageKey(id);
+      const cached = localStorage.getItem(key);
+      if (!cached) {
+        return null;
+      }
 
-  const refreshImportedAssets = useCallback(async (companyId: number, forceRefresh = false): Promise<Set<string>> => {
-    const cached = getCachedAssets(companyId);
-    
-    if (!forceRefresh && cached) {
-      setImportedAssets(cached);
-      return cached;
+      const entry: LocalStorageCacheEntry = JSON.parse(cached);
+      const age = Date.now() - entry.timestamp;
+
+      if (age > CACHE_TTL_MS) {
+        localStorage.removeItem(key);
+        return null;
+      }
+
+      return new Set(entry.assets);
+    } catch {
+      return null;
     }
+  }, [getLocalStorageKey]);
+
+  const setCachedAssetsToLocalStorage = useCallback((id: number, assets: Set<string>, lastSync?: string): void => {
+    try {
+      const key = getLocalStorageKey(id);
+      const entry: LocalStorageCacheEntry = {
+        assets: Array.from(assets),
+        timestamp: Date.now(),
+        lastSync: lastSync || new Date().toISOString(),
+      };
+      localStorage.setItem(key, JSON.stringify(entry));
+    } catch (error) {
+      console.warn('[useImportedAssets] Failed to save to localStorage', error);
+    }
+  }, [getLocalStorageKey]);
+
+  const loadFromBackendCache = useCallback(async (companyId: number): Promise<Set<string>> => {
+    try {
+      const cacheResult = await api.getImportedAssetsCache(companyId);
+      const assets = new Set<string>(cacheResult.assets.map(name => normalizeName(name)));
+      
+      setCachedAssetsToLocalStorage(companyId, assets, cacheResult.lastSync);
+      
+      return assets;
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      
+      if (errorMsg.includes('404') || errorMsg.includes('not found') || errorMsg.includes('Cache not found')) {
+        try {
+          await api.syncImportedAssets(companyId, false);
+          const cacheResult = await api.getImportedAssetsCache(companyId);
+          const assets = new Set(cacheResult.assets.map(name => normalizeName(name)));
+          
+          setCachedAssetsToLocalStorage(companyId, assets, cacheResult.lastSync);
+          
+          return assets;
+        } catch (syncError: unknown) {
+          throw new Error(`Failed to load cache: ${errorMsg}. Sync also failed: ${syncError instanceof Error ? syncError.message : 'Unknown error'}`);
+        }
+      }
+      
+      throw error;
+    }
+  }, [api, setCachedAssetsToLocalStorage]);
+
+  const refreshImportedAssets = useCallback(async (
+    companyId: number,
+    forceRefresh = false
+  ): Promise<Set<string>> => {
+    setLoading(true);
+    setError(undefined);
 
     try {
-      setLoading(true);
-      setError(undefined);
+      if (forceRefresh) {
+        try {
+          await api.syncImportedAssets(companyId, true);
+        } catch (syncError: unknown) {
+          const syncErrorMsg = syncError instanceof Error ? syncError.message : 'Failed to sync';
+          console.warn('[useImportedAssets] Sync failed, trying to load existing cache', syncErrorMsg);
+        }
+      }
+
+      const assets = await loadFromBackendCache(companyId);
       
-      const result = await api.getImportedAssets(companyId);
-      
-      const importedNames = new Set(
-        result.assets.map((asset) => normalizeName(asset.name))
-      );
-      
-      setImportedAssets(importedNames);
-      setCachedAssets(companyId, importedNames);
-      return importedNames;
-    } catch (e: any) {
-      const errorMsg = e?.message || 'Failed to load imported assets';
-      console.error('[useImportedAssets] Error fetching imported assets:', errorMsg, e);
-      setError(errorMsg);
-      throw e;
-    } finally {
+      setImportedAssets(new Set(assets));
       setLoading(false);
+      
+      return assets;
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : 'Failed to refresh imported assets';
+      setError(errorMsg);
+      setLoading(false);
+      
+      const cached = getCachedAssetsFromLocalStorage(companyId);
+      if (cached) {
+        setImportedAssets(cached);
+        return cached;
+      }
+      
+      throw e;
     }
-  }, [api, getCachedAssets, setCachedAssets]);
+  }, [api, loadFromBackendCache, getCachedAssetsFromLocalStorage]);
 
   const checkImportedNames = useCallback(async (companyId: number, names: string[]): Promise<Set<string>> => {
     if (names.length === 0) {
@@ -70,36 +132,58 @@ export function useImportedAssets(companyId: number | null) {
 
     try {
       const result = await api.checkImportedAssetNames(companyId, names);
-
       const foundNames = new Set(result.importedNames || []);
       
       setImportedAssets(prev => {
         const updated = new Set(prev);
         foundNames.forEach(name => updated.add(name));
-        return updated;
+        setCachedAssetsToLocalStorage(companyId, updated);
+        return new Set(updated);
       });
       
       return foundNames;
-    } catch (e: any) {
+    } catch {
       return new Set<string>();
     }
-  }, [api]);
+  }, [api, setCachedAssetsToLocalStorage]);
 
   useEffect(() => {
     if (companyId) {
-      const cached = getCachedAssets(companyId);
+      const cached = getCachedAssetsFromLocalStorage(companyId);
       if (cached) {
-        setImportedAssets(cached);
-      } else {
-        refreshImportedAssets(companyId).catch(() => {
-        });
+        setImportedAssets(new Set(cached));
       }
+
+      loadFromBackendCache(companyId)
+        .then(assets => {
+          setImportedAssets(new Set(assets));
+        })
+        .catch(() => {
+        });
     }
-  }, [companyId, refreshImportedAssets, getCachedAssets]);
+  }, [companyId, getCachedAssetsFromLocalStorage, loadFromBackendCache]);
 
   const isImported = useCallback((entityName: string): boolean => {
     return importedAssets.has(normalizeName(entityName));
   }, [importedAssets]);
+
+  const addImportedNames = useCallback(async (names: string[]): Promise<void> => {
+    if (!companyId || names.length === 0) return;
+
+    try {
+      await api.addImportedNames(companyId, names);
+    } catch (error) {
+    }
+
+    setImportedAssets(prev => {
+      const updated = new Set(prev);
+      names.forEach(name => {
+        updated.add(normalizeName(name));
+      });
+      setCachedAssetsToLocalStorage(companyId, updated);
+      return new Set(updated);
+    });
+  }, [companyId, api, setCachedAssetsToLocalStorage]);
 
   return {
     importedAssets,
@@ -107,7 +191,7 @@ export function useImportedAssets(companyId: number | null) {
     error,
     refreshImportedAssets,
     checkImportedNames,
+    addImportedNames,
     isImported,
   };
 }
-

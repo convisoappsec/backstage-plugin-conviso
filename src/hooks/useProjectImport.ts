@@ -12,6 +12,7 @@ interface UseProjectImportOptions {
   companyId: number | null;
   onImportSuccess?: (() => void) | undefined;
   onSelectionCleared?: () => void;
+  onImportedNamesAdded?: (names: string[]) => void;
 }
 
 interface UseProjectImportReturn {
@@ -29,6 +30,7 @@ export function useProjectImport({
   companyId,
   onImportSuccess,
   onSelectionCleared,
+  onImportedNamesAdded,
 }: UseProjectImportOptions): UseProjectImportReturn {
   const api = useApi(convisoPlatformApiRef);
   const [importing, setImporting] = useState(false);
@@ -80,6 +82,13 @@ export function useProjectImport({
           `Import job started successfully! Projects are being processed asynchronously.`
         );
         
+        if (onImportedNamesAdded && result.importedCount > 0) {
+          const importedNames = projectsToImport
+            .slice(0, result.importedCount)
+            .map(project => project.name);
+          await onImportedNamesAdded(importedNames);
+        }
+        
         if (onSelectionCleared) {
           onSelectionCleared();
         }
@@ -92,12 +101,13 @@ export function useProjectImport({
           `Failed to start import job: ${result.errors?.join(', ') || 'Unknown errors'}`
         );
       }
-    } catch (e: any) {
-      setErrorMessage(e?.message || 'Failed to import projects');
+    } catch (e: unknown) {
+      const errorMsg = e instanceof Error ? e.message : 'Failed to import projects';
+      setErrorMessage(errorMsg);
     } finally {
       setImporting(false);
     }
-  }, [selectedProjects, entities, importedAssets, companyId, api, onImportSuccess, clearMessages]);
+  }, [selectedProjects, entities, importedAssets, companyId, api, onImportSuccess, onImportedNamesAdded, clearMessages]);
 
   return {
     importing,

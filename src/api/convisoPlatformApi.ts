@@ -83,6 +83,18 @@ export interface CheckImportedNamesResult {
   importedNames: string[];
 }
 
+export interface ImportedAssetsCacheResult {
+  assets: string[];
+  lastSync: string;
+  totalCount: number;
+}
+
+export interface SyncImportedAssetsResult {
+  success: boolean;
+  synced: number;
+  duration: string;
+}
+
 export interface ConvisoPlatformApi {
   createOrUpdateBackstageIntegration(
     input: CreateOrUpdateBackstageIntegrationInput
@@ -94,7 +106,10 @@ export interface ConvisoPlatformApi {
   setAutoImport(instanceId: string, enabled: boolean, companyId?: number): Promise<{ success: boolean; enabled: boolean }>;
   getAutoImport(instanceId: string): Promise<AutoImportSetting>;
   getImportedAssets(companyId: number): Promise<ImportedAssetsResult>;
+  getImportedAssetsCache(companyId: number): Promise<ImportedAssetsCacheResult>;
+  syncImportedAssets(companyId: number, force?: boolean): Promise<SyncImportedAssetsResult>;
   checkImportedAssetNames(companyId: number, names: string[]): Promise<CheckImportedNamesResult>;
+  addImportedNames(companyId: number, names: string[]): Promise<{ success: boolean; added: number }>;
 }
 
 export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
@@ -248,6 +263,44 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
     return json;
   }
 
+  async getImportedAssetsCache(companyId: number): Promise<ImportedAssetsCacheResult> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('backend');
+    const backendBaseUrl = baseUrl.replace('/api/backend', '');
+    const url = `${backendBaseUrl}/api/conviso/imported-assets-cache/${companyId}`;
+    
+    const response = await this.fetchApi.fetch(url);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to get imported assets cache');
+    }
+
+    return await response.json();
+  }
+
+  async syncImportedAssets(companyId: number, force = false): Promise<SyncImportedAssetsResult> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('backend');
+    const backendBaseUrl = baseUrl.replace('/api/backend', '');
+    const url = `${backendBaseUrl}/api/conviso/sync-imported-assets/${companyId}`;
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        force,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to sync imported assets');
+    }
+
+    return await response.json();
+  }
+
   async checkImportedAssetNames(companyId: number, names: string[]): Promise<CheckImportedNamesResult> {
     const baseUrl = await this.discoveryApi.getBaseUrl('backend');
     const backendBaseUrl = baseUrl.replace('/api/backend', '');
@@ -267,6 +320,30 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to check imported asset names');
+    }
+
+    return await response.json();
+  }
+
+  async addImportedNames(companyId: number, names: string[]): Promise<{ success: boolean; added: number }> {
+    const baseUrl = await this.discoveryApi.getBaseUrl('backend');
+    const backendBaseUrl = baseUrl.replace('/api/backend', '');
+    const url = `${backendBaseUrl}/api/conviso/add-imported-names`;
+    
+    const response = await this.fetchApi.fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        companyId,
+        names,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to add imported names to cache');
     }
 
     return await response.json();

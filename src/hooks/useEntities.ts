@@ -38,9 +38,22 @@ export function useEntities() {
           return;
         }
         
-        const validEntities = response.items?.filter((item: any) => {
-          return item.kind === 'Component' && item.metadata?.name;
-        }) as BackstageEntity[] || [];
+        const validEntities = (response.items?.filter((item: unknown): item is BackstageEntity => {
+          if (
+            typeof item === 'object' &&
+            item !== null &&
+            'kind' in item &&
+            item.kind === 'Component' &&
+            'metadata' in item &&
+            typeof item.metadata === 'object' &&
+            item.metadata !== null &&
+            'name' in item.metadata
+          ) {
+            const metadata = item.metadata as { name?: string };
+            return typeof metadata.name === 'string' && metadata.name.trim().length > 0;
+          }
+          return false;
+        }) || []) as BackstageEntity[];
         
         setEntities(validEntities);
         
@@ -49,7 +62,6 @@ export function useEntities() {
             'The catalog may still be processing entities. ' +
             'Please wait a few minutes and refresh the page, or check the Backstage catalog configuration.';
           setError(errorMsg);
-          console.warn('[useEntities]', errorMsg);
         }
       } catch (e: unknown) {
         if (cancelled) {
@@ -78,7 +90,6 @@ export function useEntities() {
           errorMessage = 'Failed to load entities: Unknown error. Please check your Backstage catalog configuration and network connection.';
         }
         
-        console.error('[useEntities] Error fetching entities:', e);
         setError(errorMessage);
       } finally {
         if (!cancelled) {

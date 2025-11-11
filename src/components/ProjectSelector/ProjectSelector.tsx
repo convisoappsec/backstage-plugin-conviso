@@ -1,14 +1,19 @@
 import { ContentHeader, InfoCard, Progress, WarningPanel } from '@backstage/core-components';
 import { Button, CircularProgress, Grid, InputAdornment, TextField, Typography } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAutoImport } from '../../hooks/useAutoImport';
+import { useDebounce } from '../../hooks/useDebounce';
 import { useEntities } from '../../hooks/useEntities';
 import { useEntityFilter } from '../../hooks/useEntityFilter';
 import { useImportedAssets } from '../../hooks/useImportedAssets';
 import { usePagination } from '../../hooks/usePagination';
 import { useProjectImport } from '../../hooks/useProjectImport';
 import { useProjectSelection } from '../../hooks/useProjectSelection';
+import { SortableColumn, useTableSort } from '../../hooks/useTableSort';
+import { BackstageEntity } from '../../types/entity.types';
+import { getEntityId } from '../../utils/mappers';
+import { normalizeName } from '../../utils/nameNormalizer';
 import { AutoImportToggle } from '../AutoImportToggle';
 import { ProjectTable } from '../ProjectTable';
 
@@ -27,16 +32,70 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     loading: assetsLoading,
     error: assetsError,
     refreshImportedAssets,
+    addImportedNames,
   } = useImportedAssets(companyId);
 
   const [refreshSuccess, setRefreshSuccess] = useState<string | undefined>();
+  const successTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const instanceId = useMemo(() => localStorage.getItem('conviso_backstage_instance_id') || '', []);
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
   const { autoImportEnabled, setAutoImportEnabled } = useAutoImport(instanceId, companyId || undefined);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { filteredEntities } = useEntityFilter({ entities, searchQuery });
+  const { filteredEntities } = useEntityFilter({ entities, searchQuery: debouncedSearchQuery });
+
+  const entityData = useMemo(() => {
+    return filteredEntities.map((entity) => {
+      const entityId = getEntityId(entity);
+      const entityName = normalizeName(entity.metadata.name);
+      const isImported = importedAssets.has(entityName);
+      return {
+        entity,
+        entityId,
+        entityName,
+        isImported,
+      };
+    });
+  }, [filteredEntities, importedAssets]);
+
+  const getSortValue = useCallback((item: typeof entityData[0], column: SortableColumn): string | number | boolean => {
+    switch (column) {
+      case 'name':
+        return item.entity.metadata.name?.toLowerCase() || '';
+      case 'description':
+        return item.entity.metadata.description?.toLowerCase() || '';
+      case 'owner':
+        return item.entity.spec?.owner?.toLowerCase() || '';
+      case 'lifecycle':
+        return item.entity.spec?.lifecycle?.toLowerCase() || '';
+      case 'type':
+        return item.entity.spec?.type?.toLowerCase() || '';
+      case 'status':
+        return item.isImported;
+      default:
+        return '';
+    }
+  }, []);
+
+  const { sortedItems, sortColumn, sortDirection, handleSort } = useTableSort({
+    items: entityData,
+    getSortValue,
+  });
+
+  const sortedEntities = useMemo((): BackstageEntity[] => {
+    return sortedItems.map((item) => item.entity);
+  }, [sortedItems]);
+  
   const {
     paginatedItems: paginatedEntities,
     page,
@@ -45,7 +104,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     handlePageChange,
     handleRowsPerPageChange,
     resetPage,
-  } = usePagination({ items: filteredEntities });
+  } = usePagination({ items: sortedEntities });
 
   const {
     selectedProjects,
@@ -74,6 +133,7 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
     companyId,
     onImportSuccess,
     onSelectionCleared: clearSelection,
+    onImportedNamesAdded: addImportedNames,
   });
 
   const handleSearchChange = useCallback((value: string) => {
@@ -102,14 +162,28 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
             variant="outlined"
             onClick={async () => {
               if (!companyId) return;
+              
               try {
+                if (successTimeoutRef.current) {
+                  clearTimeout(successTimeoutRef.current);
+                }
                 setRefreshSuccess(undefined);
+                
+                setRefreshSuccess('Refreshing... This may take a few minutes.');
+                
                 const result = await refreshImportedAssets(companyId, true);
                 setRefreshSuccess(`Successfully refreshed! Found ${result.size} imported asset${result.size !== 1 ? 's' : ''}.`);
-                setTimeout(() => setRefreshSuccess(undefined), 5000);
-              } catch (e: any) {
-                console.error('[ProjectSelector] Refresh failed:', e);
-                setRefreshSuccess(undefined);
+                successTimeoutRef.current = setTimeout(() => {
+                  setRefreshSuccess(undefined);
+                  successTimeoutRef.current = null;
+                }, 5000);
+              } catch (e: unknown) {
+                const errorMsg = e instanceof Error ? e.message : 'Failed to refresh assets';
+                setRefreshSuccess(`Refresh failed: ${errorMsg}. Please try again or check the backend logs.`);
+                console.error('[ProjectSelector] Refresh error:', errorMsg, e);
+                setTimeout(() => {
+                  setRefreshSuccess(undefined);
+                }, 10000);
               }
             }}
             disabled={assetsLoading || importing || !companyId}
@@ -161,10 +235,10 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
           />
         </Grid>
         <Grid item>
-          <InfoCard 
-            title={`Available Components (${filteredEntities.length})`}
-            className="conviso-info-card"
-          >
+            <InfoCard 
+              title={`Available Components (${entities.length})`}
+              className="conviso-info-card"
+            >
             {loading ? (
               <Progress />
             ) : entities.length === 0 ? (
@@ -202,6 +276,9 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
                   onRowsPerPageChange={handleRowsPerPageChange}
                   isAllVisibleSelected={isAllVisibleSelected}
                   isSomeVisibleSelected={isSomeVisibleSelected}
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
                 />
               </>
             )}

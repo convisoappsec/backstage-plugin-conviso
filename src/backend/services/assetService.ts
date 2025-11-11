@@ -31,12 +31,15 @@ export class AssetService {
     const allAssets: ImportedAsset[] = [];
     let page = 1;
     let totalPages = 1;
-    const limit = 1000;
-    const CONCURRENT_REQUESTS = 5;
+    const limit = 2000;
+    const CONCURRENT_REQUESTS = 10;
+    let maxIterations = 1000;
 
     const integrationTypeFilter = INTEGRATION_TYPES.BACKSTAGE.toUpperCase();
 
-    while (page <= totalPages) {
+    while (page <= totalPages && maxIterations > 0) {
+      maxIterations--;
+      
       try {
         const pagePromises: Promise<{
           assets: {
@@ -78,20 +81,37 @@ export class AssetService {
 
         const results = await Promise.all(pagePromises);
 
+        let hasValidData = false;
         for (let i = 0; i < results.length; i++) {
           const data = results[i];
           if (data && data.assets?.collection) {
             allAssets.push(...data.assets.collection);
-            totalPages = data.assets.metadata?.totalPages || 1;
-          } else {
-            return allAssets;
+            if (i === 0 && data.assets.metadata?.totalPages) {
+              const newTotalPages = data.assets.metadata.totalPages;
+              if (newTotalPages > 0 && newTotalPages !== totalPages) {
+                totalPages = newTotalPages;
+              }
+            }
+            hasValidData = true;
           }
         }
 
+        if (!hasValidData) {
+          break;
+        }
+
         page += requestsToMake;
+        
+        if (page > totalPages) {
+          break;
+        }
       } catch (error: unknown) {
         throw error;
       }
+    }
+
+    if (maxIterations === 0) {
+      throw new Error('Maximum iterations reached. Possible infinite loop in pagination.');
     }
 
     return allAssets;
@@ -108,9 +128,7 @@ export class AssetService {
       });
 
       return importedNames;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[AssetService] Error getting imported asset names:`, errorMessage);
+    } catch {
       return new Set<string>();
     }
   }
@@ -179,12 +197,7 @@ export class AssetService {
         } else {
           hasMore = false;
         }
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[AssetService] checkImportedAssetNames: Error fetching page', {
-          page,
-          error: errorMessage,
-        });
+      } catch {
         break;
       }
     }
