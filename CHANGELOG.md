@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-11-12
+
+### Fixed
+- Fixed `ERR_REQUIRE_CYCLE_MODULE` errors by compiling backend to CommonJS
+- Backend plugin now uses compiled CommonJS files (`dist/backend/index.js`)
+- Added `backend.js` entry point that exports the compiled backend module
+- Updated README with correct import path: `@conviso/backstage-plugin-conviso/backend.js`
+- Backend follows official Backstage plugin pattern (CommonJS compilation)
+
 ## [0.1.2] - 2025-11-12
 
 ### Fixed
@@ -53,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
-[0.1.2]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.2
-[0.1.1]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.1
-[0.1.0]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.0
+       [0.1.3]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.3
+       [0.1.2]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.2
+       [0.1.1]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.1
+       [0.1.0]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.0
 

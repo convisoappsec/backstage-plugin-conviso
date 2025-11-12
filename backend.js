@@ -1,1 +1,1 @@
-export { convisoBackendPlugin, convisoBackendPlugin as default } from './src/backend/module.js';
+module.exports = require('./dist/backend/index.js');

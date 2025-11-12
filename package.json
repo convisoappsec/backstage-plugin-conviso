@@ -1,6 +1,6 @@
 {
   "name": "@conviso/backstage-plugin-conviso",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Backstage plugin for seamless integration with Conviso Platform. Sync catalog entities as security assets, manage environments, and view security insights.",
   "keywords": [
     "backstage",
@@ -29,7 +29,7 @@
   "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
-    "build": "backstage-cli package build && tsc --project tsconfig.json --outDir dist && node scripts/ensure-backend-types.js",
+    "build": "backstage-cli package build && tsc --project tsconfig.backend.json && node scripts/ensure-backend-types.js",
     "lint": "backstage-cli package lint",
     "lint:fix": "backstage-cli package lint --fix",
     "test": "NODE_OPTIONS='--no-deprecation' backstage-cli package test",
@@ -88,9 +88,7 @@
   },
   "files": [
     "dist",
-    "src/backend",
-    "backend.js",
-    "backend.d.ts"
+    "backend.js"
   ],
   "repository": {
     "type": "git",

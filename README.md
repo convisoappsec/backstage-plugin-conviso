@@ -62,7 +62,7 @@ import { convisoBackendPlugin } from '@conviso/backstage-plugin-conviso/backend.
 backend.add(convisoBackendPlugin);
 ```
 
-**Note:** The plugin automatically provides TypeScript types. No additional type declarations are needed.
+**Note:** The plugin follows the official Backstage plugin pattern, compiling the backend to CommonJS and exporting via the `exports` field in `package.json`.
 
 ### 3. Configure Environment Variables
 
