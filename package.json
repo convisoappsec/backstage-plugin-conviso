@@ -33,7 +33,10 @@
   },
   "backstage": {
     "role": "frontend-plugin",
-    "pluginId": "backstage-plugin-conviso"
+    "pluginId": "backstage-plugin-conviso",
+    "pluginPackages": [
+      "@conviso/backstage-plugin-conviso"
+    ]
   },
   "sideEffects": false,
   "scripts": {
@@ -97,7 +100,8 @@
   },
   "files": [
     "dist",
-    "backend.js"
+    "backend.js",
+    "src/backend"
   ],
   "repository": {
     "type": "git",

@@ -51,7 +51,7 @@ tsconfig.*.json
 # Source files (only dist/ should be published)
 src/
 !src/index.ts
-!src/backend/index.ts
+!src/backend/
 
 # Examples
 examples/
