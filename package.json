@@ -88,7 +88,8 @@
   },
   "files": [
     "dist",
-    "backend.js"
+    "backend.js",
+    "backend.d.ts"
   ],
   "repository": {
     "type": "git",
