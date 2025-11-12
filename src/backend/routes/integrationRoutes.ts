@@ -73,7 +73,7 @@ export function createIntegrationRoutes(
     }
   });
 
-  router.get('/config', async (req, res) => {
+  router.get('/config', async (_req, res) => {
     try {
       return res.json({
         environment: config.environment,

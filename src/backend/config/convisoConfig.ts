@@ -24,13 +24,18 @@ export function getConvisoConfig(): ConvisoConfig {
   const apiKey = process.env['CONVISO_API_KEY'] || '';
   
   const companyIdEnv = process.env['CONVISO_COMPANY_ID'];
-  const companyId = companyIdEnv ? parseInt(companyIdEnv, 10) : undefined;
+  const companyId: number | undefined = companyIdEnv ? parseInt(companyIdEnv, 10) : undefined;
 
-  return {
+  const config: ConvisoConfig = {
     apiBase,
     apiKey,
     environment,
-    companyId,
   };
+  
+  if (companyId !== undefined) {
+    config.companyId = companyId;
+  }
+  
+  return config;
 }
 

@@ -31,29 +31,42 @@ npm install @conviso/backstage-plugin-conviso
 
 ## Setup
 
-### 1. Add the Plugin to Your Backstage App
+### 1. Add the Frontend Plugin to Your Backstage App
 
 In your `packages/app/src/App.tsx`, add the plugin route:
 
 ```tsx
-import { ConvisoPage } from '@conviso/backstage-plugin-conviso';
+import { BackstagePluginConvisoPage } from '@conviso/backstage-plugin-conviso';
 
 // In your routes
-<Route path="/conviso" element={<ConvisoPage />} />
+<Route path="/conviso" element={<BackstagePluginConvisoPage />} />
 ```
 
 ### 2. Add the Backend Plugin
 
-In your `packages/backend/src/index.ts`, add the backend plugin:
+In your `packages/backend/src/index.ts`, add the backend plugin using one of the following methods:
+
+**Method 1: Dynamic import (Recommended)**
+
+```ts
+// Conviso plugin backend
+backend.add(import('@conviso/backstage-plugin-conviso/backend'));
+```
+
+**Method 2: Explicit import**
 
 ```ts
 import { convisoBackendPlugin } from '@conviso/backstage-plugin-conviso/backend';
 
 // In your backend setup
-backend.add(convisoBackendPlugin());
+backend.add(convisoBackendPlugin);
 ```
 
+**Note:** The plugin automatically provides TypeScript types. No additional type declarations are needed.
+
 ### 3. Configure Environment Variables
+
+**Important:** The backend plugin requires these environment variables to communicate with Conviso Platform.
 
 #### Production
 
@@ -95,14 +108,24 @@ conviso:
   apiBase: ${CONVISO_API_BASE} # Required if environment is 'local'
 ```
 
+## Quick Start
+
+After installation and configuration:
+
+1. Start your Backstage instance: `yarn dev` (or `yarn start`)
+2. Navigate to `http://localhost:3000/conviso` in your browser
+3. Configure your Conviso Platform integration (API key and company ID)
+4. Start importing your Backstage catalog entities!
+
 ## Usage
 
 ### Importing Projects
 
-1. Navigate to the Conviso plugin page in Backstage
-2. Browse your catalog entities
-3. Select projects you want to import
+1. Navigate to the Conviso plugin page in Backstage (`/conviso`)
+2. Browse your catalog entities in the table
+3. Select one or more projects you want to import (use checkboxes)
 4. Click "Import Selected" to sync them to Conviso Platform
+5. Wait for the import to complete (you'll see a success message)
 
 ### Auto-Import
 

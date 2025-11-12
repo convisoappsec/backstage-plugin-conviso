@@ -57,7 +57,6 @@ export function getEntityId(entity: BackstageEntity): string {
 
 function extractRepoUrl(entity: BackstageEntity): string | undefined {
   const annotations = entity.metadata.annotations || {};
-  const links = entity.metadata.links || [];
   
   const sourceLocation = annotations['backstage.io/source-location'];
   const githubUrl = annotations['github.com/project-slug'];

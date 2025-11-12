@@ -1,1 +1,1 @@
-export { convisoBackendPlugin as default } from './module';
+export { convisoBackendPlugin, convisoBackendPlugin as default } from './module';

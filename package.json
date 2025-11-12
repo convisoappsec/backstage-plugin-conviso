@@ -14,22 +14,10 @@
   ],
   "author": "Conviso Application Security",
   "license": "Apache-2.0",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "publishConfig": {
-    "access": "public",
-    "main": "dist/index.esm.js",
-    "types": "dist/index.d.ts",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.esm.js"
-      },
-      "./backend": {
-        "types": "./dist/backend/index.d.ts",
-        "default": "./dist/backend/index.esm.js"
-      }
-    }
+    "access": "public"
   },
   "backstage": {
     "role": "frontend-plugin",
@@ -41,14 +29,14 @@
   "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
-    "build": "backstage-cli package build",
+    "build": "backstage-cli package build && tsc --project tsconfig.json --outDir dist && node scripts/ensure-backend-types.js",
     "lint": "backstage-cli package lint",
     "lint:fix": "backstage-cli package lint --fix",
     "test": "NODE_OPTIONS='--no-deprecation' backstage-cli package test",
     "test:coverage": "NODE_OPTIONS='--no-deprecation' backstage-cli package test --coverage",
     "test:watch": "NODE_OPTIONS='--no-deprecation' backstage-cli package test --watch",
     "clean": "backstage-cli package clean",
-    "prepack": "backstage-cli package prepack",
+    "prepack": "backstage-cli package prepack && node scripts/ensure-backend-types.js",
     "postpack": "backstage-cli package postpack",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
@@ -100,8 +88,9 @@
   },
   "files": [
     "dist",
+    "src/backend",
     "backend.js",
-    "src/backend"
+    "backend.d.ts"
   ],
   "repository": {
     "type": "git",
@@ -110,5 +99,13 @@
   "bugs": {
     "url": "https://github.com/convisoappsec/backstage-plugin-conviso/issues"
   },
-  "homepage": "https://github.com/convisoappsec/backstage-plugin-conviso#readme"
+  "homepage": "https://github.com/convisoappsec/backstage-plugin-conviso#readme",
+  "typesVersions": {
+    "*": {
+      "package.json": [
+        "package.json"
+      ]
+    }
+  },
+  "module": "./dist/index.esm.js"
 }
