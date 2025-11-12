@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-11-12
+
+### Fixed
+- Added `backend.d.ts` type declaration file for TypeScript support
+- Fixed TypeScript error: "Cannot find declaration file for module '@conviso/backstage-plugin-conviso/backend.js'"
+
 ## [0.1.3] - 2025-11-12
 
 ### Fixed
@@ -62,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+       [0.1.4]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.4
        [0.1.3]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.3
        [0.1.2]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.2
        [0.1.1]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.1
