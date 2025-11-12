@@ -1,6 +1,6 @@
 {
   "name": "@conviso/backstage-plugin-conviso",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Backstage plugin for seamless integration with Conviso Platform. Sync catalog entities as security assets, manage environments, and view security insights.",
   "keywords": [
     "backstage",
@@ -14,8 +14,8 @@
   ],
   "author": "Conviso Application Security",
   "license": "Apache-2.0",
-  "main": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "publishConfig": {
     "access": "public"
   },
