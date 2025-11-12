@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-11-12
+
+### Fixed
+- Simplified backend plugin installation by removing unsupported `exports` field from `package.json`
+- Added `backend.js` and `backend.d.ts` entry points in package root for easier imports
+- Fixed TypeScript type errors in `entityMapper`, `convisoConfig`, and `integrationRoutes`
+- Added automatic type generation script (`ensure-backend-types.js`) for backend types
+
+### Changed
+- Backend plugin now uses TypeScript source files directly (included in package)
+- Improved README with clearer installation instructions
+
 ## [0.1.0] - 2025-11-12
 
 ### Added
@@ -35,5 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+[0.1.1]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.1
 [0.1.0]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.0
 
