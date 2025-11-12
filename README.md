@@ -50,13 +50,13 @@ In your `packages/backend/src/index.ts`, add the backend plugin using one of the
 
 ```ts
 // Conviso plugin backend
-backend.add(import('@conviso/backstage-plugin-conviso/backend'));
+backend.add(import('@conviso/backstage-plugin-conviso/backend.js'));
 ```
 
 **Method 2: Explicit import**
 
 ```ts
-import { convisoBackendPlugin } from '@conviso/backstage-plugin-conviso/backend';
+import { convisoBackendPlugin } from '@conviso/backstage-plugin-conviso/backend.js';
 
 // In your backend setup
 backend.add(convisoBackendPlugin);
@@ -66,24 +66,23 @@ backend.add(convisoBackendPlugin);
 
 ### 3. Configure Environment Variables
 
-**Important:** The backend plugin requires these environment variables to communicate with Conviso Platform.
+**Important:** The backend plugin reads configuration from environment variables. You need to set these in your environment or `.env` file.
 
 #### Production
 
-For production use, you only need these environment variables:
+For production use, set these environment variables:
 
 ```bash
 export CONVISO_API_KEY="your-api-key"
 export CONVISO_COMPANY_ID="your-company-id"
 ```
 
-Or in your `app-config.yaml`:
+Or create a `.env` file in your Backstage root directory:
 
-```yaml
-# app-config.yaml
-conviso:
-  apiKey: ${CONVISO_API_KEY}
-  companyId: ${CONVISO_COMPANY_ID}
+```bash
+# .env
+CONVISO_API_KEY=your-api-key
+CONVISO_COMPANY_ID=your-company-id
 ```
 
 #### Development
@@ -94,19 +93,20 @@ For local development, you may need additional configuration:
 export CONVISO_API_KEY="your-api-key"
 export CONVISO_COMPANY_ID="your-company-id"
 export CONVISO_ENVIRONMENT="local"
-export CONVISO_API_BASE="http://localhost:3000" # Your local API URL
+export CONVISO_API_BASE="http://localhost:3000" # Your local Conviso Platform API URL
 ```
 
-Or in your `app-config.yaml`:
+Or in your `.env` file:
 
-```yaml
-# app-config.yaml
-conviso:
-  apiKey: ${CONVISO_API_KEY}
-  companyId: ${CONVISO_COMPANY_ID}
-  environment: ${CONVISO_ENVIRONMENT:-production}
-  apiBase: ${CONVISO_API_BASE} # Required if environment is 'local'
+```bash
+# .env
+CONVISO_API_KEY=your-api-key
+CONVISO_COMPANY_ID=your-company-id
+CONVISO_ENVIRONMENT=local
+CONVISO_API_BASE=http://localhost:3000
 ```
+
+**Note:** The plugin reads configuration directly from environment variables. The `app-config.yaml` is not used for Conviso plugin configuration.
 
 ## Quick Start
 
