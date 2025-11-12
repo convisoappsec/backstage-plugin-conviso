@@ -56,7 +56,7 @@ describe('getConvisoConfig', () => {
     process.env['CONVISO_ENVIRONMENT'] = 'local';
     delete process.env['CONVISO_API_BASE'];
 
-    expect(() => getConvisoConfig()).toThrow('CONVISO_API_BASE is required when CONVISO_ENV=local');
+    expect(() => getConvisoConfig()).toThrow('CONVISO_API_BASE is required when CONVISO_ENVIRONMENT=local');
   });
 
   it('should parse companyId as integer', () => {

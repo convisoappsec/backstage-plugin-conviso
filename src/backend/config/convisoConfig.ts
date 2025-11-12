@@ -1,3 +1,5 @@
+import type { Config } from '@backstage/config';
+
 export interface ConvisoConfig {
   apiBase: string;
   apiKey: string;
@@ -5,26 +7,66 @@ export interface ConvisoConfig {
   companyId?: number;
 }
 
-export function getConvisoConfig(): ConvisoConfig {
-  const environment = process.env['CONVISO_ENVIRONMENT'] || 'production';
+export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
+  const getConfigValue = (key: string, defaultValue?: string): string | undefined => {
+    if (rootConfig) {
+      try {
+        if (key === 'companyId') {
+          const numberValue = rootConfig.getOptionalNumber(`conviso.${key}`);
+          if (numberValue !== undefined) {
+            return numberValue.toString();
+          }
+          const stringValue = rootConfig.getOptionalString(`conviso.${key}`);
+          if (stringValue !== undefined) {
+            return stringValue;
+          }
+        } else {
+          const stringValue = rootConfig.getOptionalString(`conviso.${key}`);
+          if (stringValue !== undefined) {
+            return stringValue;
+          }
+        }
+      } catch {
+      }
+    }
+    return process.env[`CONVISO_${key.toUpperCase().replace(/\./g, '_')}`] || defaultValue;
+  };
+
+  const environment = getConfigValue('environment') || process.env['CONVISO_ENVIRONMENT'] || 'production';
   
   let apiBase: string;
   
   if (environment === 'staging') {
     apiBase = 'https://api.staging.convisoappsec.com';
   } else if (environment === 'local') {
-    apiBase = process.env['CONVISO_API_BASE'] || '';
+    apiBase = getConfigValue('apiBase') || process.env['CONVISO_API_BASE'] || '';
     if (!apiBase) {
-      throw new Error('CONVISO_API_BASE is required when CONVISO_ENV=local');
+      throw new Error('CONVISO_API_BASE is required when CONVISO_ENVIRONMENT=local');
     }
   } else {
     apiBase = 'https://api.convisoappsec.com';
   }
   
-  const apiKey = process.env['CONVISO_API_KEY'] || '';
+  const apiKey = getConfigValue('apiKey') || process.env['CONVISO_API_KEY'] || '';
   
-  const companyIdEnv = process.env['CONVISO_COMPANY_ID'];
-  const companyId: number | undefined = companyIdEnv ? parseInt(companyIdEnv, 10) : undefined;
+  let companyId: number | undefined;
+  if (rootConfig) {
+    try {
+      companyId = rootConfig.getOptionalNumber('conviso.companyId');
+      if (companyId === undefined) {
+        const companyIdStr = rootConfig.getOptionalString('conviso.companyId');
+        if (companyIdStr) {
+          companyId = parseInt(companyIdStr, 10);
+        }
+      }
+    } catch {
+      const companyIdStr = process.env['CONVISO_COMPANY_ID'];
+      companyId = companyIdStr ? parseInt(companyIdStr, 10) : undefined;
+    }
+  } else {
+    const companyIdStr = process.env['CONVISO_COMPANY_ID'];
+    companyId = companyIdStr ? parseInt(companyIdStr, 10) : undefined;
+  }
 
   const config: ConvisoConfig = {
     apiBase,

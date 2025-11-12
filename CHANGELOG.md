@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2025-11-12
+
+### Added
+- **Backstage Config API support**: Plugin now reads configuration from `app-config.yaml` using Backstage's Config API
+- **Dual configuration support**: Plugin reads from `app-config.yaml` first, falls back to environment variables for compatibility
+
+### Changed
+- **Configuration method**: Plugin now uses `coreServices.rootConfig` to read from `app-config.yaml`
+- **README reorganized**: Improved structure and clarity, removed duplication, better organization of setup and configuration sections
+- **README updated**: Added clear instructions for configuring via `app-config.yaml` with environment variable substitution and manual sidebar link setup
+
+### Fixed
+- **Environment variables**: Fixed issue where environment variables were not being read correctly
+- **Configuration precedence**: Configuration now properly reads from Backstage config system first, then environment variables
+
 ## [0.1.4] - 2025-11-12
 
 ### Fixed
@@ -68,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+       [0.1.5]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.5
        [0.1.4]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.4
        [0.1.3]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.3
        [0.1.2]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.2

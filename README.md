@@ -31,9 +31,9 @@ npm install @conviso/backstage-plugin-conviso
 
 ## Setup
 
-### 1. Add the Frontend Plugin to Your Backstage App
+### 1. Add the Frontend Plugin
 
-In your `packages/app/src/App.tsx`, add the plugin route:
+**1.1. Add the route** (`packages/app/src/App.tsx`):
 
 ```tsx
 import { BackstagePluginConvisoPage } from '@conviso/backstage-plugin-conviso';
@@ -42,71 +42,103 @@ import { BackstagePluginConvisoPage } from '@conviso/backstage-plugin-conviso';
 <Route path="/conviso" element={<BackstagePluginConvisoPage />} />
 ```
 
+**1.2. Add sidebar navigation link** (`packages/app/src/components/Root/Root.tsx`):
+
+```tsx
+import { SidebarItem } from '@backstage/core-components';
+import SecurityIcon from '@material-ui/icons/Security';
+
+// Inside the SidebarGroup "Menu", add:
+<SidebarItem icon={SecurityIcon} to="conviso" text="Conviso" />
+```
+
+This adds a "Conviso" link to the sidebar menu.
+
 ### 2. Add the Backend Plugin
 
-In your `packages/backend/src/index.ts`, add the backend plugin using one of the following methods:
-
-**Method 1: Dynamic import (Recommended)**
+In your `packages/backend/src/index.ts`, add the backend plugin:
 
 ```ts
 // Conviso plugin backend
 backend.add(import('@conviso/backstage-plugin-conviso/backend.js'));
 ```
 
-**Method 2: Explicit import**
-
-```ts
-import { convisoBackendPlugin } from '@conviso/backstage-plugin-conviso/backend.js';
-
-// In your backend setup
-backend.add(convisoBackendPlugin);
-```
-
 **Note:** The plugin follows the official Backstage plugin pattern, compiling the backend to CommonJS and exporting via the `exports` field in `package.json`.
 
-### 3. Configure Environment Variables
+### 3. Configure the Plugin
 
-**Important:** The backend plugin reads configuration from environment variables. You need to set these in your environment or `.env` file.
+The plugin supports two configuration methods. Choose the one that best fits your setup:
 
-#### Production
+#### Method 1: Using app-config.yaml (Recommended)
 
-For production use, set these environment variables:
+Add the Conviso configuration to your `app-config.yaml`:
 
-```bash
-export CONVISO_API_KEY="your-api-key"
-export CONVISO_COMPANY_ID="your-company-id"
+```yaml
+# Conviso Platform configuration
+conviso:
+  apiKey: ${CONVISO_API_KEY}
+  companyId: ${CONVISO_COMPANY_ID}
+  environment: ${CONVISO_ENVIRONMENT:-production}
+  apiBase: ${CONVISO_API_BASE}  # Required if environment is 'local'
 ```
 
-Or create a `.env` file in your Backstage root directory:
+**Important:** Always use environment variable substitution (`${VAR}`) in `app-config.yaml` to avoid committing sensitive values to Git. Never hardcode API keys or company IDs directly in the config file.
 
-```bash
-# .env
-CONVISO_API_KEY=your-api-key
-CONVISO_COMPANY_ID=your-company-id
-```
+Then set the environment variables using one of the following options:
 
-#### Development
+**Option A: Using a `.env` file (requires dotenv-cli)**
 
-For local development, you may need additional configuration:
-
-```bash
-export CONVISO_API_KEY="your-api-key"
-export CONVISO_COMPANY_ID="your-company-id"
-export CONVISO_ENVIRONMENT="local"
-export CONVISO_API_BASE="http://localhost:3000" # Your local Conviso Platform API URL
-```
-
-Or in your `.env` file:
+1. Create a `.env` file in your Backstage root directory:
 
 ```bash
 # .env
 CONVISO_API_KEY=your-api-key
 CONVISO_COMPANY_ID=your-company-id
-CONVISO_ENVIRONMENT=local
-CONVISO_API_BASE=http://localhost:3000
+CONVISO_ENVIRONMENT=production  # or "staging" or "local"
+CONVISO_API_BASE=http://localhost:3000  # Only if environment is 'local'
 ```
 
-**Note:** The plugin reads configuration directly from environment variables. The `app-config.yaml` is not used for Conviso plugin configuration.
+2. Install `dotenv-cli`:
+
+```bash
+yarn add -D dotenv-cli
+```
+
+3. Update your start script in `package.json`:
+
+```json
+{
+  "scripts": {
+    "start": "dotenv -e .env -- backstage-cli repo start"
+  }
+}
+```
+
+**Option B: Export environment variables directly**
+
+Export the variables in your shell before starting Backstage:
+
+```bash
+export CONVISO_API_KEY="your-api-key"
+export CONVISO_COMPANY_ID="your-company-id"
+export CONVISO_ENVIRONMENT="production"  # or "staging" or "local"
+export CONVISO_API_BASE="http://localhost:3000"  # Only if environment is 'local'
+```
+
+**Note:** Backstage does not automatically load `.env` files. You must either use `dotenv-cli` or export the variables in your shell environment.
+
+#### Method 2: Using Environment Variables Only
+
+If you prefer not to use `app-config.yaml`, the plugin reads directly from environment variables:
+
+```bash
+export CONVISO_API_KEY="your-api-key"
+export CONVISO_COMPANY_ID="your-company-id"
+export CONVISO_ENVIRONMENT="production"  # or "staging" or "local"
+export CONVISO_API_BASE="http://localhost:3000"  # Only if environment is 'local'
+```
+
+**Note:** The plugin reads configuration from `app-config.yaml` first (if configured), then falls back to environment variables for compatibility.
 
 ## Quick Start
 
@@ -114,8 +146,7 @@ After installation and configuration:
 
 1. Start your Backstage instance: `yarn dev` (or `yarn start`)
 2. Navigate to `http://localhost:3000/conviso` in your browser
-3. Configure your Conviso Platform integration (API key and company ID)
-4. Start importing your Backstage catalog entities!
+3. Start importing your Backstage catalog entities!
 
 ## Usage
 
@@ -151,20 +182,28 @@ The backend plugin provides the following REST API endpoints:
 - `POST /api/conviso/integration` - Create or update integration
 - `POST /api/conviso/auto-import` - Configure auto-import settings
 
-## Configuration
+## Configuration Reference
 
-### Backend Configuration
+### Environment Variables
 
-The backend plugin supports the following environment variables:
+**Required:**
+- `CONVISO_API_KEY` - Your Conviso Platform API key
 
-**Production:**
-- `CONVISO_API_KEY` (required): Your Conviso Platform API key
-- `CONVISO_COMPANY_ID` (optional): Default company ID
+**Optional:**
+- `CONVISO_COMPANY_ID` - Default company ID (can also be provided per integration)
+- `CONVISO_ENVIRONMENT` - Environment: `"production"` (default), `"staging"`, or `"local"`
+- `CONVISO_API_BASE` - Custom API base URL (required if `CONVISO_ENVIRONMENT=local`)
+- `CONVISO_CACHE_DIR` - Custom cache directory path
 
-**Development:**
-- `CONVISO_ENVIRONMENT` (optional): Set to `"local"` for local development
-- `CONVISO_API_BASE` (required if environment is 'local'): Custom API base URL for local development
-- `CONVISO_CACHE_DIR` (optional): Custom cache directory path
+### app-config.yaml Structure
+
+```yaml
+conviso:
+  apiKey: ${CONVISO_API_KEY}
+  companyId: ${CONVISO_COMPANY_ID}
+  environment: ${CONVISO_ENVIRONMENT:-production}
+  apiBase: ${CONVISO_API_BASE}  # Required if environment is 'local'
+```
 
 ### Frontend Configuration
 
@@ -204,12 +243,14 @@ yarn test:watch
 ## Architecture
 
 ### Frontend
+
 - React components with Material-UI
 - Custom hooks for state management
 - Caching layer for performance optimization
 - Real-time status updates
 
 ### Backend
+
 - Express.js REST API
 - GraphQL client for Conviso Platform
 - Kafka integration for async processing

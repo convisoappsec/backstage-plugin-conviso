@@ -21,10 +21,11 @@ export const convisoBackendPlugin = createBackendPlugin({
         catalogApi: catalogServiceRef,
         auth: coreServices.auth,
         logger: coreServices.logger,
+        config: coreServices.rootConfig,
       },
-      async init({ httpRouter, catalogApi, auth, logger }) {
+      async init({ httpRouter, catalogApi, auth, logger, config: rootConfig }) {
         const router = express.Router();
-        const config = getConvisoConfig();
+        const config = getConvisoConfig(rootConfig);
 
         router.use(express.json());
 
