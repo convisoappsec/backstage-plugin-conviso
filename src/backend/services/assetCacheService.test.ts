@@ -40,9 +40,10 @@ describe('AssetCacheService', () => {
     it('should create cache directory if it does not exist', () => {
       (fs.existsSync as jest.Mock).mockReturnValue(false);
       
-      new AssetCacheService(mockAssetService, mockLogger);
+      const service = new AssetCacheService(mockAssetService, mockLogger);
       
       expect(fs.mkdirSync).toHaveBeenCalled();
+      expect(service).toBeDefined();
     });
 
     it('should load cache from file if it exists', () => {

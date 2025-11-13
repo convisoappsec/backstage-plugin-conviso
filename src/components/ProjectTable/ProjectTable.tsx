@@ -65,13 +65,11 @@ const ProjectTableRow = memo(({
               ? "Disable Automatic Import to select projects manually"
               : ""
           }
-          className={
-            isImported
-              ? 'conviso-checkbox-imported'
-              : isSelected
-              ? 'conviso-checkbox-selected'
-              : ''
-          }
+          className={(() => {
+            if (isImported) return 'conviso-checkbox-imported';
+            if (isSelected) return 'conviso-checkbox-selected';
+            return '';
+          })()}
         />
       </TableCell>
       <TableCell>
