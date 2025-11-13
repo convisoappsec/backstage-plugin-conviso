@@ -64,7 +64,7 @@ export class ConvisoApiService {
         );
       }
 
-      const json: GraphQLResponse<T> = await response.json();
+      const json = await response.json() as GraphQLResponse<T>;
 
       if (json.errors) {
         throw new Error(json.errors[0]?.message || 'GraphQL error');

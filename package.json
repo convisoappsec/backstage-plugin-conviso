@@ -29,7 +29,7 @@
   "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
-    "build": "backstage-cli package build && tsc --project tsconfig.backend.json && node scripts/ensure-backend-types.js",
+    "build": "backstage-cli package build && yarn tsc --project tsconfig.backend.json && node scripts/ensure-backend-types.js",
     "lint": "backstage-cli package lint",
     "lint:fix": "backstage-cli package lint --fix",
     "test": "NODE_OPTIONS='--no-deprecation' backstage-cli package test",
@@ -38,7 +38,7 @@
     "clean": "backstage-cli package clean",
     "prepack": "backstage-cli package prepack && node scripts/ensure-backend-types.js",
     "postpack": "backstage-cli package postpack",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit && tsc --noEmit --project tsconfig.backend.json",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
