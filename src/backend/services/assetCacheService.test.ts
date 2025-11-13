@@ -263,7 +263,9 @@ describe('AssetCacheService', () => {
     });
 
     it('should not remove names if cache does not exist', () => {
-      cacheService.removeNames(999, ['asset-1']);
+      expect(() => {
+        cacheService.removeNames(999, ['asset-1']);
+      }).not.toThrow();
     });
 
     it('should save cache to file after removing names', async () => {

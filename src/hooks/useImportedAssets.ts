@@ -59,37 +59,37 @@ export function useImportedAssets(companyId: number | null) {
     }
   }, [getLocalStorageKey]);
 
-  const loadFromBackendCache = useCallback(async (companyId: number): Promise<Set<string>> => {
+  const loadFromBackendCache = useCallback(async (targetCompanyId: number): Promise<Set<string>> => {
     try {
-      const cacheResult = await api.getImportedAssetsCache(companyId);
+      const cacheResult = await api.getImportedAssetsCache(targetCompanyId);
       const assets = new Set<string>(cacheResult.assets.map(name => normalizeName(name)));
       
-      setCachedAssetsToLocalStorage(companyId, assets, cacheResult.lastSync);
+      setCachedAssetsToLocalStorage(targetCompanyId, assets, cacheResult.lastSync);
       
       return assets;
-    } catch (error: unknown) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       
       if (errorMsg.includes('404') || errorMsg.includes('not found') || errorMsg.includes('Cache not found')) {
         try {
-          await api.syncImportedAssets(companyId, false);
-          const cacheResult = await api.getImportedAssetsCache(companyId);
+          await api.syncImportedAssets(targetCompanyId, false);
+          const cacheResult = await api.getImportedAssetsCache(targetCompanyId);
           const assets = new Set(cacheResult.assets.map(name => normalizeName(name)));
           
-          setCachedAssetsToLocalStorage(companyId, assets, cacheResult.lastSync);
+          setCachedAssetsToLocalStorage(targetCompanyId, assets, cacheResult.lastSync);
           
           return assets;
-        } catch (syncError: unknown) {
-          throw new Error(`Failed to load cache: ${errorMsg}. Sync also failed: ${syncError instanceof Error ? syncError.message : 'Unknown error'}`);
+        } catch (syncErr: unknown) {
+          throw new Error(`Failed to load cache: ${errorMsg}. Sync also failed: ${syncErr instanceof Error ? syncErr.message : 'Unknown error'}`);
         }
       }
       
-      throw error;
+      throw err;
     }
   }, [api, setCachedAssetsToLocalStorage]);
 
   const refreshImportedAssets = useCallback(async (
-    companyId: number,
+    targetCompanyId: number,
     forceRefresh = false
   ): Promise<Set<string>> => {
     setLoading(true);
@@ -98,13 +98,13 @@ export function useImportedAssets(companyId: number | null) {
     try {
       if (forceRefresh) {
         try {
-          await api.syncImportedAssets(companyId, true);
+          await api.syncImportedAssets(targetCompanyId, true);
         } catch {
           // Sync failed - will try to load existing cache
         }
       }
 
-      const assets = await loadFromBackendCache(companyId);
+      const assets = await loadFromBackendCache(targetCompanyId);
       
       setImportedAssets(new Set(assets));
       setLoading(false);
@@ -115,7 +115,7 @@ export function useImportedAssets(companyId: number | null) {
       setError(errorMsg);
       setLoading(false);
       
-      const cached = getCachedAssetsFromLocalStorage(companyId);
+      const cached = getCachedAssetsFromLocalStorage(targetCompanyId);
       if (cached) {
         setImportedAssets(cached);
         return cached;
@@ -125,19 +125,19 @@ export function useImportedAssets(companyId: number | null) {
     }
   }, [api, loadFromBackendCache, getCachedAssetsFromLocalStorage]);
 
-  const checkImportedNames = useCallback(async (companyId: number, names: string[]): Promise<Set<string>> => {
+  const checkImportedNames = useCallback(async (targetCompanyId: number, names: string[]): Promise<Set<string>> => {
     if (names.length === 0) {
       return new Set<string>();
     }
 
     try {
-      const result = await api.checkImportedAssetNames(companyId, names);
+      const result = await api.checkImportedAssetNames(targetCompanyId, names);
       const foundNames = new Set(result.importedNames || []);
       
       setImportedAssets(prev => {
         const updated = new Set(prev);
         foundNames.forEach(name => updated.add(name));
-        setCachedAssetsToLocalStorage(companyId, updated);
+        setCachedAssetsToLocalStorage(targetCompanyId, updated);
         return new Set(updated);
       });
       

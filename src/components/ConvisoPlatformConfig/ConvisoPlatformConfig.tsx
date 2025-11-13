@@ -1,7 +1,7 @@
 import { Content, Header, HeaderLabel, InfoCard, Page, Progress, WarningPanel } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
 import { Button, Grid, Tab, Tabs, Typography } from '@material-ui/core';
-import { OpenInNew } from '@material-ui/icons';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 import { useEffect, useMemo, useState } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import { ProjectSelector } from '../ProjectSelector';

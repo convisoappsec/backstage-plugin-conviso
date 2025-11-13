@@ -254,11 +254,11 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
               title={`Available Components (${entities.length})`}
               className="conviso-info-card"
             >
-            {loading ? (
-              <Progress />
-            ) : entities.length === 0 ? (
+            {loading && <Progress />}
+            {!loading && entities.length === 0 && (
               <Typography variant="body1">No components found in the catalog.</Typography>
-            ) : (
+            )}
+            {!loading && entities.length > 0 && (
               <>
                 <Grid item xs={12} style={{ marginBottom: '16px' }}>
                   <TextField

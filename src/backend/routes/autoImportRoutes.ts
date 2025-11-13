@@ -21,7 +21,7 @@ export function createAutoImportRoutes(
 
       inMemoryStore.setAutoImportSetting(instanceId, enabled);
 
-      let companyId: number | undefined = companyIdFromRequest
+      const companyId = companyIdFromRequest
         ? parseInt(companyIdFromRequest.toString(), 10)
         : inMemoryStore.getCompanyId(instanceId) || config.companyId;
 
@@ -41,6 +41,7 @@ export function createAutoImportRoutes(
             });
           }
         } catch {
+          // Silently fail - integration update is optional
         }
       }
 
@@ -54,6 +55,7 @@ export function createAutoImportRoutes(
               currentCompanyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
             }
           } catch {
+            // Silently fail - integration fetch is optional
           }
         }
 

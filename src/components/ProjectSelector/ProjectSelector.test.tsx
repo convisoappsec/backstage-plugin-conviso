@@ -337,7 +337,7 @@ describe('ProjectSelector', () => {
       importing: false,
       errorMessage: null,
       successMessage: 'Success',
-      handleImport: () => {
+      handleImport: async () => {
         onImportSuccess();
       },
     });
@@ -345,6 +345,8 @@ describe('ProjectSelector', () => {
     render(<ProjectSelector onImportSuccess={onImportSuccess} />);
     const importButton = screen.getByText(/Import Selected/);
     fireEvent.click(importButton);
+    
+    expect(onImportSuccess).toHaveBeenCalled();
   });
 });
 
