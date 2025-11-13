@@ -290,11 +290,20 @@ describe('ProjectSelector', () => {
   });
 
   it('should call refreshImportedAssets when "Refresh Status" button is clicked', async () => {
-    localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockResolvedValue(new Set(['project-1']));
 
     renderWithApi(<ProjectSelector />);
-    const refreshButton = screen.getByText('Refresh Status');
+    
+    await waitFor(() => {
+      expect(mockApi.getConfig).toHaveBeenCalled();
+    });
+
+    const refreshButton = await waitFor(() => {
+      const button = screen.getByText('Refresh Status');
+      expect(button).not.toBeDisabled();
+      return button;
+    });
+
     fireEvent.click(refreshButton);
 
     await waitFor(() => {
@@ -303,29 +312,38 @@ describe('ProjectSelector', () => {
   });
 
   it('should show refresh success message after successful refresh', async () => {
-    localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockResolvedValue(new Set(['project-1', 'project-2']));
 
     renderWithApi(<ProjectSelector />);
+    
+    await waitFor(() => {
+      expect(mockApi.getConfig).toHaveBeenCalled();
+    });
+
     const refreshButton = screen.getByText('Refresh Status');
     fireEvent.click(refreshButton);
 
     await waitFor(() => {
       expect(screen.getByText(/Successfully refreshed! Found 2 imported assets/)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should show refresh error message when refresh fails', async () => {
-    localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockRejectedValue(new Error('Refresh failed'));
 
     renderWithApi(<ProjectSelector />);
+    
+    // Wait for companyId to be loaded
+    await waitFor(() => {
+      expect(mockApi.getConfig).toHaveBeenCalled();
+    });
+
     const refreshButton = screen.getByText('Refresh Status');
     fireEvent.click(refreshButton);
 
     await waitFor(() => {
       expect(screen.getByText(/Refresh failed: Refresh failed/)).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should disable refresh button when assets are loading', () => {
@@ -353,7 +371,7 @@ describe('ProjectSelector', () => {
     expect(screen.getByTestId('auto-import-toggle')).toBeInTheDocument();
   });
 
-  it('should call onImportSuccess callback when provided and import succeeds', () => {
+  it('should call onImportSuccess callback when provided and import succeeds', async () => {
     const onImportSuccess = jest.fn();
     mockUseProjectImport.mockReturnValue({
       importing: false,
@@ -364,11 +382,31 @@ describe('ProjectSelector', () => {
       },
     });
 
-    render(<ProjectSelector onImportSuccess={onImportSuccess} />);
+    mockUseProjectSelection.mockReturnValue({
+      selectedProjects: new Set(['project-1']),
+      toggleProject: mockToggleProject,
+      selectAll: mockSelectAll,
+      selectAllVisible: mockSelectAllVisible,
+      clearSelection: mockClearSelection,
+      isAllSelected: false,
+      isAllVisibleSelected: false,
+      isSomeSelected: true,
+      isSomeVisibleSelected: true,
+    });
+
+    renderWithApi(<ProjectSelector onImportSuccess={onImportSuccess} />);
+    
+    // Wait for companyId to be loaded
+    await waitFor(() => {
+      expect(mockApi.getConfig).toHaveBeenCalled();
+    });
+
     const importButton = screen.getByText(/Import Selected/);
     fireEvent.click(importButton);
     
-    expect(onImportSuccess).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onImportSuccess).toHaveBeenCalled();
+    });
   });
 });
 

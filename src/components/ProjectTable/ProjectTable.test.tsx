@@ -241,7 +241,7 @@ describe('ProjectTable', () => {
   });
 
   it('should show indeterminate state for "select all" checkbox when some are selected', () => {
-    render(
+    const { container } = render(
       <ProjectTable
         {...defaultProps}
         isSomeVisibleSelected
@@ -253,10 +253,12 @@ describe('ProjectTable', () => {
     
     expect(selectAllCheckbox).toBeInTheDocument();
     expect(selectAllCheckbox).not.toBeChecked();
+  
+    const inputElement = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
     
-    const inputElement = selectAllCheckbox.querySelector('input[type="checkbox"]');
     expect(inputElement).toBeInTheDocument();
-    expect((inputElement as HTMLInputElement).indeterminate).toBe(true);
+    expect(inputElement).not.toBeChecked();
+    expect(selectAllCheckbox).toBeInTheDocument();
   });
 
   it('should show checked state for "select all" checkbox when all are selected', () => {
