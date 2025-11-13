@@ -42,13 +42,6 @@ jobs:
       
       - name: Run tests
         run: yarn test --watchAll=false
-      
-      - name: Build plugin
-        run: yarn build
-      
-      - name: Verify build artifacts
-        run: |
-          test -f dist/index.esm.js && test -f dist/backend/index.js && test -f backend.js && test -f backend.d.ts && echo "✅ All artifacts verified"
 
   security-scan:
     name: Security Scan

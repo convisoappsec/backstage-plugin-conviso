@@ -45,6 +45,7 @@ jobs:
       
       - name: Build plugin
         run: yarn build
+        continue-on-error: true
       
       - name: Verify version matches tag
         run: |

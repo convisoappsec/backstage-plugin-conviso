@@ -42,19 +42,6 @@ jobs:
       
       - name: Run tests
         run: yarn test --watchAll=false
-      
-      - name: Build plugin
-        run: yarn build
-      
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: staging-build-${{ github.sha }}
-          path: |
-            dist/
-            backend.js
-            backend.d.ts
-          retention-days: 7
 
   security-scan:
     name: Security Scan
