@@ -1,6 +1,6 @@
 import { TestApiProvider } from '@backstage/test-utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import type { ReactElement } from 'react';
 import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import * as useAutoImportHook from '../../hooks/useAutoImport';
 import * as useEntitiesHook from '../../hooks/useEntities';
@@ -116,7 +116,7 @@ describe('ProjectSelector', () => {
     getImportedAssets: jest.fn(),
   };
 
-  const renderWithApi = (component: React.ReactElement) => {
+  const renderWithApi = (component: ReactElement) => {
     return render(
       <TestApiProvider apis={[[convisoPlatformApiRef, mockApi]]}>
         {component}
