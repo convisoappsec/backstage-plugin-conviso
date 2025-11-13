@@ -26,9 +26,8 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
             return stringValue;
           }
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[Conviso] Error getting config value for key:', key, error);
+      } catch {
+        // Silently fail - config errors are handled by validation
       }
     }
     return process.env[`CONVISO_${key.toUpperCase().replace(/\./g, '_')}`] || defaultValue;
@@ -61,7 +60,6 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
     }
   }
   
-  // If not found in env, try from rootConfig
   if (companyId === undefined && rootConfig) {
     try {
       companyId = rootConfig.getOptionalNumber('conviso.companyId');
@@ -85,9 +83,8 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
           }
         }
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[Conviso] Error getting companyId from config:', error);
+    } catch {
+      // Silently fail - will use undefined companyId
     }
   }
 

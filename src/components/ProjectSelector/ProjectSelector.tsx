@@ -36,8 +36,8 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
         if (config.companyId) {
           setCompanyId(config.companyId);
         }
-      } catch (e) {
-        console.error('[ProjectSelector] Failed to load companyId:', e);
+      } catch {
+        // Error handled silently - will show error message if needed
       }
     }
     loadCompanyId();
@@ -195,7 +195,6 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
                 }, 5000);
               } catch (e: unknown) {
                 const errorMsg = e instanceof Error ? e.message : 'Failed to refresh assets';
-                console.error('[ProjectSelector] Refresh error:', errorMsg, e);
                 setRefreshSuccess(`Refresh failed: ${errorMsg}. Please try again or check the backend logs.`);
                 setTimeout(() => {
                   setRefreshSuccess(undefined);

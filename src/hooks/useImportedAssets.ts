@@ -39,8 +39,8 @@ export function useImportedAssets(companyId: number | null) {
       }
 
       return new Set(entry.assets);
-    } catch (error) {
-      console.warn('[useImportedAssets] Failed to read from localStorage cache:', error);
+    } catch {
+      // Error reading from localStorage - return null to use backend cache
       return null;
     }
   }, [getLocalStorageKey]);
@@ -54,8 +54,8 @@ export function useImportedAssets(companyId: number | null) {
         lastSync: lastSync || new Date().toISOString(),
       };
       localStorage.setItem(key, JSON.stringify(entry));
-    } catch (error) {
-      console.warn('[useImportedAssets] Failed to save to localStorage', error);
+    } catch {
+      // Error saving to localStorage - non-critical, continue without cache
     }
   }, [getLocalStorageKey]);
 
@@ -99,9 +99,8 @@ export function useImportedAssets(companyId: number | null) {
       if (forceRefresh) {
         try {
           await api.syncImportedAssets(companyId, true);
-        } catch (syncError: unknown) {
-          const syncErrorMsg = syncError instanceof Error ? syncError.message : 'Failed to sync';
-          console.warn('[useImportedAssets] Sync failed, trying to load existing cache', syncErrorMsg);
+        } catch {
+          // Sync failed - will try to load existing cache
         }
       }
 
@@ -173,7 +172,8 @@ export function useImportedAssets(companyId: number | null) {
 
     try {
       await api.addImportedNames(companyId, names);
-    } catch (error) {
+    } catch {
+      // Silently fail - error is handled by the API layer
     }
 
     setImportedAssets(prev => {

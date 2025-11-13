@@ -62,8 +62,8 @@ export const ConvisoPlatformConfig = () => {
             });
             integrationRestored = true;
           }
-        } catch (e: any) {
-          console.error('[Conviso] Error fetching integration:', e);
+        } catch {
+          // Error handled by UI state
           if (savedIntegrationId) {
             setIntegration({
               id: savedIntegrationId,
@@ -78,8 +78,8 @@ export const ConvisoPlatformConfig = () => {
         if (integrationRestored || savedIntegrationId) {
           setActiveTab(1);
         }
-      } catch (e: any) {
-        console.error('[Conviso] Error in checkIntegration:', e);
+      } catch {
+        // Error handled by UI state
       } finally {
         setLoadingIntegration(false);
       }
@@ -89,8 +89,8 @@ export const ConvisoPlatformConfig = () => {
       try {
         const config = await api.getConfig();
         setPlatformUrl(config.platformUrl);
-      } catch (e: any) {
-        console.error('[Conviso] Failed to load config:', e);
+      } catch {
+        // Error handled silently - config is optional
       }
     }
     

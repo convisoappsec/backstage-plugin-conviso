@@ -107,7 +107,7 @@ export function useProjectImport({
     } finally {
       setImporting(false);
     }
-  }, [selectedProjects, entities, importedAssets, companyId, api, onImportSuccess, onImportedNamesAdded, clearMessages]);
+  }, [selectedProjects, entities, importedAssets, companyId, api, onImportSuccess, onImportedNamesAdded, onSelectionCleared, clearMessages]);
 
   return {
     importing,
