@@ -34,14 +34,7 @@ jobs:
             ${{ runner.os }}-yarn-
       
       - name: Install dependencies
-        run: |
-          if [ "${{ steps.yarn-cache.outputs.cache-hit }}" != "true" ]; then
-            echo "Cache miss - installing all dependencies"
-            yarn install --frozen-lockfile=false
-          else
-            echo "Cache hit - verifying dependencies"
-            yarn install --frozen-lockfile=false --check-cache || yarn install --frozen-lockfile=false
-          fi
+        run: yarn install --frozen-lockfile=false
       
       - name: Run linter
         run: yarn lint
