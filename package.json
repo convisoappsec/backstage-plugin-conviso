@@ -66,9 +66,11 @@
     "react": "^16.13.1 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
+    "@backstage/backend-plugin-api": "^1.4.4",
     "@backstage/cli": "^0.34.4",
     "@backstage/core-app-api": "^1.19.1",
     "@backstage/dev-utils": "^1.1.15",
+    "@backstage/plugin-catalog-node": "^1.9.0",
     "@backstage/test-utils": "^1.7.12",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.2.0",
