@@ -10,7 +10,7 @@ export function createImportRoutes(
 ): express.Router {
   const router = express.Router();
 
-  router.get('/imported-assets/:companyId?', async (req, res) => {
+  router.get('/imported-assets/:companyId?', async (req: express.Request, res: express.Response) => {
     const companyIdFromParam = req.params.companyId;
     
     try {
@@ -41,7 +41,7 @@ export function createImportRoutes(
     }
   });
 
-  router.post('/check-imported-names', async (req, res) => {
+  router.post('/check-imported-names', async (req: express.Request, res: express.Response) => {
     try {
       const { companyId: companyIdFromBody, names } = req.body;
 
@@ -73,7 +73,7 @@ export function createImportRoutes(
     }
   });
 
-  router.get('/imported-assets-cache/:companyId?', async (req, res) => {
+  router.get('/imported-assets-cache/:companyId?', async (req: express.Request, res: express.Response) => {
     const companyIdFromParam = req.params.companyId;
     
     try {
@@ -101,7 +101,7 @@ export function createImportRoutes(
     }
   });
 
-  router.post('/sync-imported-assets/:companyId?', async (req, res) => {
+  router.post('/sync-imported-assets/:companyId?', async (req: express.Request, res: express.Response) => {
     const companyIdFromParam = req.params.companyId;
     const force = req.body.force === true;
     
@@ -132,7 +132,7 @@ export function createImportRoutes(
     }
   });
 
-  router.post('/import-projects', async (req, res) => {
+  router.post('/import-projects', async (req: express.Request, res: express.Response) => {
     try {
       const { companyId: companyIdFromBody, projects } = req.body;
 
@@ -174,7 +174,7 @@ export function createImportRoutes(
     }
   });
 
-  router.post('/add-imported-names', async (req, res) => {
+  router.post('/add-imported-names', async (req: express.Request, res: express.Response) => {
     try {
       const { companyId: companyIdFromBody, names } = req.body;
 

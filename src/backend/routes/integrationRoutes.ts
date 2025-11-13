@@ -9,7 +9,7 @@ export function createIntegrationRoutes(
 ): express.Router {
   const router = express.Router();
 
-  router.get('/integration/:instanceId', async (req, res) => {
+  router.get('/integration/:instanceId', async (req: express.Request, res: express.Response) => {
     try {
       const { instanceId } = req.params;
 
@@ -39,7 +39,7 @@ export function createIntegrationRoutes(
     }
   });
 
-  router.post('/integration', async (req, res) => {
+  router.post('/integration', async (req: express.Request, res: express.Response) => {
     try {
       const { companyId: companyIdFromBody, backstageUrl, instanceId } = req.body;
 
@@ -73,12 +73,11 @@ export function createIntegrationRoutes(
     }
   });
 
-  router.get('/config', async (_req, res) => {
+  router.get('/config', async (_req: express.Request, res: express.Response) => {
     try {
-      // Read companyId directly from process.env as fallback (same logic as createOrUpdateIntegration)
       let companyId = config.companyId;
       if (!companyId) {
-        const envCompanyId = process.env['CONVISO_COMPANY_ID'];
+        const envCompanyId = process.env.CONVISO_COMPANY_ID;
         if (envCompanyId) {
           const parsed = parseInt(envCompanyId, 10);
           if (!isNaN(parsed)) {
