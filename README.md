@@ -1,9 +1,34 @@
 # Conviso Platform Backstage Plugin
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![npm version](https://img.shields.io/npm/v/@conviso/backstage-plugin-conviso)](https://www.npmjs.com/package/@conviso/backstage-plugin-conviso)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/convisoappsec/backstage-plugin-conviso/main/assets/convisoappsec_logo.png" alt="Conviso Logo" width="200"/>
+  
+  [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![npm version](https://img.shields.io/npm/v/@conviso/backstage-plugin-conviso)](https://www.npmjs.com/package/@conviso/backstage-plugin-conviso)
+</div>
 
 Backstage plugin for integration with [Conviso Platform](https://convisoappsec.com/). Import your Backstage catalog entities as assets in Conviso Platform.
+
+## Demo
+
+![Plugin Demo](https://raw.githubusercontent.com/convisoappsec/backstage-plugin-conviso/main/assets/demo.gif)
+
+## Screenshots
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/convisoappsec/backstage-plugin-conviso/main/assets/screenshot-1.png" alt="Integration Creation" width="600"/>
+  <p><strong>Integration Creation</strong> - Create and configure your Conviso Platform integration</p>
+</div>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/convisoappsec/backstage-plugin-conviso/main/assets/screenshot-2.png" alt="Entity List" width="600"/>
+  <p><strong>Entity List</strong> - Browse and view your Backstage catalog entities</p>
+</div>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/convisoappsec/backstage-plugin-conviso/main/assets/screenshot-3.png" alt="Entity Import" width="600"/>
+  <p><strong>Entity Import</strong> - Select and import Backstage entities as security assets</p>
+</div>
 
 ## Features
 

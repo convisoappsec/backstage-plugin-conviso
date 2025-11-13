@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2025-01-15
+
+### Added
+- **Visual assets**: Added Conviso logo, screenshots, and demo GIF to README
+- **Documentation improvements**: Enhanced README with visual demonstrations of plugin features
+
+### Changed
+- **Package optimization**: Excluded assets folder from npm package to reduce plugin size
+- **README layout**: Improved README structure with better visual organization
+
 ## [0.1.7] - 2025-01-15
 
 ### Added
