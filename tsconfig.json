@@ -17,14 +17,13 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
+    "outDir": "./dist-types",
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {
@@ -49,7 +48,8 @@
     "**/*.test.tsx",
     "**/*.spec.ts",
     "**/*.spec.tsx",
-    "**/__tests__/**/*"
+    "**/__tests__/**/*",
+    "src/backend/**/*"
   ],
   "ts-node": {
     "esm": true

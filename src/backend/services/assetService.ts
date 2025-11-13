@@ -1,3 +1,4 @@
+import { LoggerService } from '@backstage/backend-plugin-api';
 import { ASSET_TYPES, BATCH_PROCESSING, INTEGRATION_TYPES } from '../constants';
 import { normalizeEntityName } from '../utils/nameNormalizer';
 import { ConvisoApiService } from './convisoApiService';
@@ -8,7 +9,10 @@ export interface ImportedAsset {
 }
 
 export class AssetService {
-  constructor(private apiService: ConvisoApiService) {}
+  constructor(
+    private apiService: ConvisoApiService,
+    private logger?: LoggerService
+  ) {}
 
   async getImportedAssets(companyId: number): Promise<ImportedAsset[]> {
     const query = `
@@ -130,7 +134,7 @@ export class AssetService {
       return importedNames;
     } catch (error: unknown) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[AssetService] Failed to get imported assets:', errorMsg, error);
+      this.logger?.error('Failed to get imported assets', { error: errorMsg });
       return new Set<string>();
     }
   }
@@ -201,7 +205,7 @@ export class AssetService {
         }
       } catch (error: unknown) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error('[AssetService] Error fetching page during pagination, stopping', {
+        this.logger?.error('Error fetching page during pagination, stopping', {
           page,
           error: errorMsg,
         });

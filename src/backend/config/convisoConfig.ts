@@ -26,21 +26,21 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
             return stringValue;
           }
         }
-      } catch (error) {
-        console.error('[Conviso] Error getting config value for key:', key, error);
+      } catch {
+        // Silently fail - config errors are handled by validation
       }
     }
     return process.env[`CONVISO_${key.toUpperCase().replace(/\./g, '_')}`] || defaultValue;
   };
 
-  const environment = getConfigValue('environment') || process.env['CONVISO_ENVIRONMENT'] || 'production';
+  const environment = getConfigValue('environment') || process.env.CONVISO_ENVIRONMENT || 'production';
   
   let apiBase: string;
   
   if (environment === 'staging') {
     apiBase = 'https://api.staging.convisoappsec.com';
   } else if (environment === 'local') {
-    apiBase = getConfigValue('apiBase') || process.env['CONVISO_API_BASE'] || '';
+    apiBase = getConfigValue('apiBase') || process.env.CONVISO_API_BASE || '';
     if (!apiBase) {
       throw new Error('CONVISO_API_BASE is required when CONVISO_ENVIRONMENT=local');
     }
@@ -48,12 +48,11 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
     apiBase = 'https://api.convisoappsec.com';
   }
   
-  const apiKey = getConfigValue('apiKey') || process.env['CONVISO_API_KEY'] || '';
+  const apiKey = getConfigValue('apiKey') || process.env.CONVISO_API_KEY || '';
   
   let companyId: number | undefined;
   
-  // Try to get from environment variable first (most reliable)
-  const envCompanyId = process.env['CONVISO_COMPANY_ID'];
+  const envCompanyId = process.env.CONVISO_COMPANY_ID;
   if (envCompanyId) {
     const parsed = parseInt(envCompanyId, 10);
     if (!isNaN(parsed)) {
@@ -61,7 +60,6 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
     }
   }
   
-  // If not found in env, try from rootConfig
   if (companyId === undefined && rootConfig) {
     try {
       companyId = rootConfig.getOptionalNumber('conviso.companyId');
@@ -85,8 +83,8 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
           }
         }
       }
-    } catch (error) {
-      console.error('[Conviso] Error getting companyId from config:', error);
+    } catch {
+      // Silently fail - will use undefined companyId
     }
   }
 

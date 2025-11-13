@@ -21,7 +21,7 @@ describe('AutoImportToggle', () => {
 
   it('should render with toggle on', async () => {
     await renderInTestApp(
-      <AutoImportToggle enabled={true} onChange={mockOnChange} />
+      <AutoImportToggle enabled onChange={mockOnChange} />
     );
 
     expect(screen.getByText('Enabled')).toBeInTheDocument();

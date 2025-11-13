@@ -83,9 +83,9 @@ describe('createImportRoutes', () => {
       testApp.use(express.json());
       testApp.use('/api/conviso', router);
 
-      await request(testApp)
-        .get('/api/conviso/imported-assets')
-        .expect(400);
+      const response = await request(testApp).get('/api/conviso/imported-assets');
+      
+      expect(response.status).toBe(400);
     });
 
     it('should return 500 when API key is not configured', async () => {

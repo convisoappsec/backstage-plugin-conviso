@@ -11,7 +11,7 @@ export function createAutoImportRoutes(
 ): express.Router {
   const router = express.Router();
 
-  router.post('/auto-import', async (req, res) => {
+  router.post('/auto-import', async (req: express.Request, res: express.Response) => {
     try {
       const { instanceId, enabled, companyId: companyIdFromRequest } = req.body;
 
@@ -21,7 +21,7 @@ export function createAutoImportRoutes(
 
       inMemoryStore.setAutoImportSetting(instanceId, enabled);
 
-      let companyId: number | undefined = companyIdFromRequest
+      const companyId = companyIdFromRequest
         ? parseInt(companyIdFromRequest.toString(), 10)
         : inMemoryStore.getCompanyId(instanceId) || config.companyId;
 
@@ -41,6 +41,7 @@ export function createAutoImportRoutes(
             });
           }
         } catch {
+          // Silently fail - integration update is optional
         }
       }
 
@@ -54,6 +55,7 @@ export function createAutoImportRoutes(
               currentCompanyId = inMemoryStore.getCompanyId(instanceId) || config.companyId;
             }
           } catch {
+            // Silently fail - integration fetch is optional
           }
         }
 
@@ -71,9 +73,12 @@ export function createAutoImportRoutes(
     }
   });
 
-  router.get('/auto-import/:instanceId', async (req, res) => {
+  router.get('/auto-import/:instanceId', async (req: express.Request, res: express.Response) => {
     try {
       const { instanceId } = req.params;
+      if (!instanceId) {
+        return res.status(400).json({ error: 'instanceId is required' });
+      }
       const enabled = inMemoryStore.getAutoImportSetting(instanceId) || false;
 
       return res.json({ enabled });
@@ -82,7 +87,7 @@ export function createAutoImportRoutes(
     }
   });
 
-  router.post('/trigger-auto-import', async (_req, res) => {
+  router.post('/trigger-auto-import', async (_req: express.Request, res: express.Response) => {
     try {
       const results = await autoImportService.checkAndImportNewEntities();
 
@@ -105,7 +110,7 @@ export function createAutoImportRoutes(
     }
   });
 
-  router.post('/test-auto-import', async (_req, res) => {
+  router.post('/test-auto-import', async (_req: express.Request, res: express.Response) => {
     try {
       const results = await autoImportService.checkAndImportNewEntities();
 

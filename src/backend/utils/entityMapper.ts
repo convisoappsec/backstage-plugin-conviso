@@ -20,10 +20,10 @@ export function extractProjectDataFromEntity(entity: Entity): ProjectData {
     description: entity.metadata.description || '',
     url: entity.metadata.annotations?.['backstage.io/view-url'] || '',
     repoUrl: entity.metadata.annotations?.['backstage.io/source-location'] || '',
-    lifecycle: String(spec['lifecycle'] || ''),
+    lifecycle: String((spec as Record<string, unknown>).lifecycle || ''),
     tags: entity.metadata.tags || [],
-    owner: String(spec['owner'] || ''),
-    assetType: String(spec['type'] || 'service'),
+    owner: String((spec as Record<string, unknown>).owner || ''),
+    assetType: String((spec as Record<string, unknown>).type || 'service'),
   };
 }
 

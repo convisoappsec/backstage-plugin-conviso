@@ -57,7 +57,11 @@ export function useTableSort<T>({
       } else if (typeof aValue === 'number' && typeof bValue === 'number') {
         comparison = aValue - bValue;
       } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
-        comparison = aValue === bValue ? 0 : aValue ? 1 : -1;
+        if (aValue === bValue) {
+          comparison = 0;
+        } else {
+          comparison = aValue ? 1 : -1;
+        }
       } else {
         comparison = String(aValue).localeCompare(String(bValue));
       }

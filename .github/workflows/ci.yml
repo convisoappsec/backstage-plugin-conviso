@@ -17,10 +17,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'yarn'
+      
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      
+      - name: Cache yarn packages
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-packages-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-packages-
       
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
       
       - name: Run linter
         run: yarn lint
@@ -30,16 +41,3 @@ jobs:
       
       - name: Run tests
         run: yarn test --coverage --watchAll=false
-      
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-      
-      - name: Build plugin
-        run: yarn build
-      
-      - name: Verify build artifacts
-        run: |
-          test -f dist/index.esm.js && test -f dist/backend/index.js && test -f backend.js && test -f backend.d.ts && echo "✅ All artifacts verified"

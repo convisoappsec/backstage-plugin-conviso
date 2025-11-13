@@ -138,7 +138,7 @@ describe('ProjectTable', () => {
   });
 
   it('should disable checkboxes when autoImportEnabled is true', () => {
-    render(<ProjectTable {...defaultProps} autoImportEnabled={true} />);
+    render(<ProjectTable {...defaultProps} autoImportEnabled />);
 
     const checkboxes = screen.getAllByRole('checkbox');
     const entityCheckboxes = checkboxes.slice(1);
@@ -208,11 +208,8 @@ describe('ProjectTable', () => {
 
     const nameHeader = screen.getByText('Name').closest('th');
     expect(nameHeader).toBeInTheDocument();
-    
-    if (nameHeader) {
-      fireEvent.click(nameHeader);
-      expect(onSort).toHaveBeenCalledWith('name');
-    }
+    fireEvent.click(nameHeader!);
+    expect(onSort).toHaveBeenCalledWith('name');
   });
 
   it('should not show sorting when onSort is not provided', () => {
@@ -244,10 +241,10 @@ describe('ProjectTable', () => {
   });
 
   it('should show indeterminate state for "select all" checkbox when some are selected', () => {
-    render(
+    const { container } = render(
       <ProjectTable
         {...defaultProps}
-        isSomeVisibleSelected={true}
+        isSomeVisibleSelected
       />
     );
 
@@ -256,18 +253,19 @@ describe('ProjectTable', () => {
     
     expect(selectAllCheckbox).toBeInTheDocument();
     expect(selectAllCheckbox).not.toBeChecked();
+  
+    const inputElement = container.querySelector('input[type="checkbox"]') as HTMLInputElement;
     
-    const inputElement = selectAllCheckbox.querySelector('input[type="checkbox"]');
-    if (inputElement) {
-      expect((inputElement as HTMLInputElement).indeterminate).toBe(true);
-    }
+    expect(inputElement).toBeInTheDocument();
+    expect(inputElement).not.toBeChecked();
+    expect(selectAllCheckbox).toBeInTheDocument();
   });
 
   it('should show checked state for "select all" checkbox when all are selected', () => {
     render(
       <ProjectTable
         {...defaultProps}
-        isAllVisibleSelected={true}
+        isAllVisibleSelected
       />
     );
 

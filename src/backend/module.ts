@@ -39,7 +39,7 @@ export const convisoBackendPlugin = createBackendPlugin({
 
         const apiService = new ConvisoApiService(config);
         const integrationService = new IntegrationService(apiService);
-        const assetService = new AssetService(apiService);
+        const assetService = new AssetService(apiService, logger);
         const assetCacheService = new AssetCacheService(assetService, logger);
         const autoImportService = new AutoImportService(
           assetService,

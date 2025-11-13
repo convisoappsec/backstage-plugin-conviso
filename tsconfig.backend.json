@@ -15,7 +15,15 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "types": ["node"],
+    "emitDeclarationOnly": false,
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "src/backend/**/*.ts"
@@ -23,8 +31,6 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.spec.ts",
-    "node_modules",
-    "dist"
+    "node_modules"
   ]
 }
-

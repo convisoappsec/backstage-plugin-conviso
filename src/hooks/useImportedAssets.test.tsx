@@ -93,6 +93,7 @@ describe('useImportedAssets', () => {
       try {
         await result.current.refreshImportedAssets(123, true);
       } catch {
+        // Expected error in test
       }
     });
     

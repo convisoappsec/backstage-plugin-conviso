@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2025-01-15
+
+### Added
+- **CI/CD workflows**: Complete CI/CD pipeline setup with automated testing, security scans, and npm publishing
+- **Trusted Publisher**: Configured npm publishing via OIDC (OpenID Connect) for enhanced security
+- **Automatic tag creation**: Tags are now created automatically from package.json version on merge to main
+- **Pre-release validation**: Automatic validation of version and CHANGELOG updates before merging to main
+- **Automatic PR creation**: PR from staging to main is created automatically after merge to staging
+- **Security scan integration**: Conviso CLI security scanning integrated into staging and production workflows
+- **Documentation**: Complete documentation in English for contributing, branch protection, and workflows
+
+### Changed
+- **Workflow optimization**: Consolidated jobs to reduce GitHub Actions costs
+- **Documentation language**: All documentation files translated to English
+
 ## [0.1.6] - 2025-11-12
 
 ### Changed

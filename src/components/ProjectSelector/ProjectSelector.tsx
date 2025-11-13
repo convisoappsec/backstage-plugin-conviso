@@ -36,8 +36,8 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
         if (config.companyId) {
           setCompanyId(config.companyId);
         }
-      } catch (e) {
-        console.error('[ProjectSelector] Failed to load companyId:', e);
+      } catch {
+        // Error handled silently - will show error message if needed
       }
     }
     loadCompanyId();
@@ -195,7 +195,6 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
                 }, 5000);
               } catch (e: unknown) {
                 const errorMsg = e instanceof Error ? e.message : 'Failed to refresh assets';
-                console.error('[ProjectSelector] Refresh error:', errorMsg, e);
                 setRefreshSuccess(`Refresh failed: ${errorMsg}. Please try again or check the backend logs.`);
                 setTimeout(() => {
                   setRefreshSuccess(undefined);
@@ -255,11 +254,11 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
               title={`Available Components (${entities.length})`}
               className="conviso-info-card"
             >
-            {loading ? (
-              <Progress />
-            ) : entities.length === 0 ? (
+            {loading && <Progress />}
+            {!loading && entities.length === 0 && (
               <Typography variant="body1">No components found in the catalog.</Typography>
-            ) : (
+            )}
+            {!loading && entities.length > 0 && (
               <>
                 <Grid item xs={12} style={{ marginBottom: '16px' }}>
                   <TextField
