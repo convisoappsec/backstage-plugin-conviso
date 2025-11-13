@@ -57,6 +57,9 @@ src/
 examples/
 *.example
 
+# Assets (kept in GitHub, referenced via URLs in README)
+assets/
+
 # Temporary files
 tmp/
 temp/
