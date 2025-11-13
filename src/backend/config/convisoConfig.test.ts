@@ -73,7 +73,7 @@ describe('getConvisoConfig', () => {
 
     const config = getConvisoConfig();
 
-    expect(config.companyId).toBeNaN();
+    expect(config.companyId).toBeUndefined();
   });
 
   it('should return empty apiKey when not set', () => {

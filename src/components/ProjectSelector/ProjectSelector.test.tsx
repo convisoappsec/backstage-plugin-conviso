@@ -1,4 +1,7 @@
+import { TestApiProvider } from '@backstage/test-utils';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import * as useAutoImportHook from '../../hooks/useAutoImport';
 import * as useEntitiesHook from '../../hooks/useEntities';
 import * as useImportedAssetsHook from '../../hooks/useImportedAssets';
@@ -102,6 +105,25 @@ describe('ProjectSelector', () => {
   const mockToggleProject = jest.fn();
   const mockClearSelection = jest.fn();
 
+  const mockApi = {
+    getConfig: jest.fn().mockResolvedValue({ companyId: 123 }),
+    getProjects: jest.fn(),
+    importProjects: jest.fn(),
+    createOrUpdateIntegration: jest.fn(),
+    getIntegration: jest.fn(),
+    getAutoImportStatus: jest.fn(),
+    setAutoImportStatus: jest.fn(),
+    getImportedAssets: jest.fn(),
+  };
+
+  const renderWithApi = (component: React.ReactElement) => {
+    return render(
+      <TestApiProvider apis={[[convisoPlatformApiRef, mockApi]]}>
+        {component}
+      </TestApiProvider>
+    );
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
@@ -146,12 +168,12 @@ describe('ProjectSelector', () => {
   });
 
   it('should render component with title', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByText('Select Projects')).toBeInTheDocument();
   });
 
   it('should render entities in table', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByTestId('project-table')).toBeInTheDocument();
     expect(screen.getByText('project-1')).toBeInTheDocument();
     expect(screen.getByText('project-2')).toBeInTheDocument();
@@ -164,7 +186,7 @@ describe('ProjectSelector', () => {
       error: null,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     // Progress component should be rendered
     expect(screen.getByText('Available Components (0)')).toBeInTheDocument();
   });
@@ -176,30 +198,30 @@ describe('ProjectSelector', () => {
       error: null,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByText('No components found in the catalog.')).toBeInTheDocument();
   });
 
   it('should display total count of entities', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByText('Available Components (2)')).toBeInTheDocument();
   });
 
   it('should render search input', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const searchInput = screen.getByPlaceholderText('Search by name, description, or owner...');
     expect(searchInput).toBeInTheDocument();
   });
 
   it('should render action buttons', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByText('Select All')).toBeInTheDocument();
     expect(screen.getByText('Refresh Status')).toBeInTheDocument();
     expect(screen.getByText(/Import Selected/)).toBeInTheDocument();
   });
 
   it('should call selectAll when "Select All" button is clicked', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const selectAllButton = screen.getByText('Select All');
     fireEvent.click(selectAllButton);
     expect(mockSelectAll).toHaveBeenCalled();
@@ -219,7 +241,7 @@ describe('ProjectSelector', () => {
       isSomeVisibleSelected: false,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const importButton = screen.getByText(/Import Selected/);
     fireEvent.click(importButton);
     expect(mockHandleImport).toHaveBeenCalled();
@@ -231,7 +253,7 @@ describe('ProjectSelector', () => {
       setAutoImportEnabled: mockSetAutoImportEnabled,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     // Find buttons by role and filter by text content
     const buttons = screen.getAllByRole('button');
     const selectAllButton = buttons.find(btn => btn.textContent?.includes('Select All'));
@@ -250,7 +272,7 @@ describe('ProjectSelector', () => {
       error: 'Failed to load entities',
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     // WarningPanel renders the error message as children
     expect(screen.getByText('Failed to load entities')).toBeInTheDocument();
   });
@@ -263,7 +285,7 @@ describe('ProjectSelector', () => {
       handleImport: mockHandleImport,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByText('Successfully imported 2 projects')).toBeInTheDocument();
   });
 
@@ -271,7 +293,7 @@ describe('ProjectSelector', () => {
     localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockResolvedValue(new Set(['project-1']));
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const refreshButton = screen.getByText('Refresh Status');
     fireEvent.click(refreshButton);
 
@@ -284,7 +306,7 @@ describe('ProjectSelector', () => {
     localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockResolvedValue(new Set(['project-1', 'project-2']));
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const refreshButton = screen.getByText('Refresh Status');
     fireEvent.click(refreshButton);
 
@@ -297,7 +319,7 @@ describe('ProjectSelector', () => {
     localStorage.setItem('conviso_company_id', '123');
     mockRefreshImportedAssets.mockRejectedValue(new Error('Refresh failed'));
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     const refreshButton = screen.getByText('Refresh Status');
     fireEvent.click(refreshButton);
 
@@ -316,7 +338,7 @@ describe('ProjectSelector', () => {
       addImportedNames: mockAddImportedNames,
     });
 
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     // Find all buttons and filter by the one that contains "Refreshing..."
     const buttons = screen.getAllByRole('button');
     const refreshButton = buttons.find(button => 
@@ -327,7 +349,7 @@ describe('ProjectSelector', () => {
   });
 
   it('should render AutoImportToggle component', () => {
-    render(<ProjectSelector />);
+    renderWithApi(<ProjectSelector />);
     expect(screen.getByTestId('auto-import-toggle')).toBeInTheDocument();
   });
 
