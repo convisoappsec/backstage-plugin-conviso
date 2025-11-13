@@ -1,0 +1,71 @@
+name: Create Pull Request to Main
+
+on:
+  push:
+    branches:
+      - staging
+
+env:
+  BASE_BRANCH: main
+
+jobs:
+  createPullRequest:
+    name: Create PR to Main
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get current date
+        id: set-current-date
+        run: |
+          CURRENT_DATE=$(date -Iseconds)
+          echo "current_date=$CURRENT_DATE" >> $GITHUB_OUTPUT
+      
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: staging
+          destination_branch: ${{ env.BASE_BRANCH }}
+          pr_title: "[${{ steps.set-current-date.outputs.current_date }}] Merging staging into main"
+          pr_draft: false
+          pr_allow_empty: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_body: |
+            ## Description
+            
+            This pull request automatically merges changes from the `staging` branch into the `main` branch.
+            **Date Created:** ${{ steps.set-current-date.outputs.current_date }}
+            
+            ## ⚠️ Release Requirements
+            
+            Before merging this PR to `main`, ensure:
+            
+            - [ ] **Version updated** in `package.json`
+            - [ ] **CHANGELOG.md updated** with entry for new version
+            - [ ] All tests passing
+            - [ ] Security scan passing
+            - [ ] Build successful
+            
+            The `pre-release.yml` workflow will automatically validate these requirements.
+            
+            ## Changes Included
+            
+            This PR includes all changes merged to `staging` since the last release.
+            
+            ### Related Pull Requests
+            
+            - Check the commit history for related PRs merged to staging
+            
+            ## Next Steps
+            
+            1. Review this PR
+            2. Ensure version and CHANGELOG are updated (if this is a release)
+            3. Wait for `pre-release.yml` validation to pass
+            4. Get required approvals
+            5. Merge to `main`
+            6. After merge, create a tag `vX.Y.Z` to trigger npm publication
+

@@ -1,0 +1,111 @@
+name: Pre-Release Validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-release:
+    name: Validate Release Requirements
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check if version was updated
+        id: check_version
+        run: |
+          git fetch origin ${{ github.base_ref }}:base-branch
+          BASE_VERSION=$(git show base-branch:package.json 2>/dev/null | grep -o '"version": "[^"]*"' | cut -d'"' -f4 || echo "0.0.0")
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          if [ "$CURRENT_VERSION" == "$BASE_VERSION" ]; then
+            echo "❌ Version not updated! Current: $CURRENT_VERSION, Base: $BASE_VERSION"
+            echo "version_updated=false" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "✅ Version updated: $BASE_VERSION → $CURRENT_VERSION"
+            echo "version_updated=true" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+      
+      - name: Check if CHANGELOG was updated
+        id: check_changelog
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if grep -q "^## \[$CURRENT_VERSION\]" CHANGELOG.md; then
+            echo "✅ CHANGELOG.md contains entry for version $CURRENT_VERSION"
+            echo "changelog_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ CHANGELOG.md missing entry for version $CURRENT_VERSION"
+            echo "changelog_updated=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Comment PR with validation results
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            const versionOk = '${{ steps.check_version.outputs.version_updated }}' === 'true';
+            const changelogOk = '${{ steps.check_changelog.outputs.changelog_updated }}' === 'true';
+            
+            const status = versionOk && changelogOk ? '✅' : '❌';
+            const title = versionOk && changelogOk 
+              ? '## ✅ Release Validation Passed' 
+              : '## ❌ Release Validation Failed';
+            
+            const issues = [];
+            if (!versionOk) {
+              issues.push('- ❌ **Version not updated** in package.json');
+            }
+            if (!changelogOk) {
+              issues.push('- ❌ **CHANGELOG.md not updated** for new version');
+            }
+            
+            const comment = `${title}
+            
+            ${issues.length > 0 ? '### Issues Found:\n' + issues.join('\n') + '\n\n' : ''}
+            ### Requirements for Production Release:
+            - ✅ Version must be updated in \`package.json\` (any increment: MAJOR.MINOR.PATCH)
+            - ✅ CHANGELOG.md must have entry for new version
+            
+            ${versionOk && changelogOk ? '**Ready for merge!** 🚀' : '**Please fix the issues above before merging.**'}
+            `;
+            
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('Release Validation')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+      
+      - name: Fail if validation failed
+        if: steps.check_version.outputs.version_updated != 'true' || steps.check_changelog.outputs.changelog_updated != 'true'
+        run: |
+          echo "❌ Release validation failed. See PR comment for details."
+          exit 1

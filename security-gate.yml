@@ -1,0 +1,8 @@
+rules:
+- from: any
+  severity:
+    critical:
+      maximum: 5
+    high:
+      maximum: 20
+
