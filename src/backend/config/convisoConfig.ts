@@ -26,7 +26,8 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
             return stringValue;
           }
         }
-      } catch {
+      } catch (error) {
+        console.error('[Conviso] Error getting config value for key:', key, error);
       }
     }
     return process.env[`CONVISO_${key.toUpperCase().replace(/\./g, '_')}`] || defaultValue;
@@ -50,22 +51,43 @@ export function getConvisoConfig(rootConfig?: Config): ConvisoConfig {
   const apiKey = getConfigValue('apiKey') || process.env['CONVISO_API_KEY'] || '';
   
   let companyId: number | undefined;
-  if (rootConfig) {
+  
+  // Try to get from environment variable first (most reliable)
+  const envCompanyId = process.env['CONVISO_COMPANY_ID'];
+  if (envCompanyId) {
+    const parsed = parseInt(envCompanyId, 10);
+    if (!isNaN(parsed)) {
+      companyId = parsed;
+    }
+  }
+  
+  // If not found in env, try from rootConfig
+  if (companyId === undefined && rootConfig) {
     try {
       companyId = rootConfig.getOptionalNumber('conviso.companyId');
       if (companyId === undefined) {
         const companyIdStr = rootConfig.getOptionalString('conviso.companyId');
         if (companyIdStr) {
-          companyId = parseInt(companyIdStr, 10);
+          // Check if it's a placeholder that wasn't substituted
+          if (companyIdStr.startsWith('${') && companyIdStr.endsWith('}')) {
+            // Placeholder not substituted, use env fallback
+            if (envCompanyId) {
+              const parsed = parseInt(envCompanyId, 10);
+              if (!isNaN(parsed)) {
+                companyId = parsed;
+              }
+            }
+          } else {
+            const parsed = parseInt(companyIdStr, 10);
+            if (!isNaN(parsed)) {
+              companyId = parsed;
+            }
+          }
         }
       }
-    } catch {
-      const companyIdStr = process.env['CONVISO_COMPANY_ID'];
-      companyId = companyIdStr ? parseInt(companyIdStr, 10) : undefined;
+    } catch (error) {
+      console.error('[Conviso] Error getting companyId from config:', error);
     }
-  } else {
-    const companyIdStr = process.env['CONVISO_COMPANY_ID'];
-    companyId = companyIdStr ? parseInt(companyIdStr, 10) : undefined;
   }
 
   const config: ConvisoConfig = {

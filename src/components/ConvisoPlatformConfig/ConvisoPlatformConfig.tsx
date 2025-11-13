@@ -49,9 +49,6 @@ export const ConvisoPlatformConfig = () => {
           const result = await api.getIntegration(instanceId);
           if (result && result.integration) {
             setIntegration(result.integration);
-            if (result.companyId) {
-              localStorage.setItem('conviso_company_id', result.companyId.toString());
-            }
             if (result.integration.id) {
               localStorage.setItem('conviso_integration_id', result.integration.id);
             }
@@ -66,6 +63,7 @@ export const ConvisoPlatformConfig = () => {
             integrationRestored = true;
           }
         } catch (e: any) {
+          console.error('[Conviso] Error fetching integration:', e);
           if (savedIntegrationId) {
             setIntegration({
               id: savedIntegrationId,
@@ -81,6 +79,7 @@ export const ConvisoPlatformConfig = () => {
           setActiveTab(1);
         }
       } catch (e: any) {
+        console.error('[Conviso] Error in checkIntegration:', e);
       } finally {
         setLoadingIntegration(false);
       }
@@ -91,7 +90,7 @@ export const ConvisoPlatformConfig = () => {
         const config = await api.getConfig();
         setPlatformUrl(config.platformUrl);
       } catch (e: any) {
-        // Silently fail, use default production URL
+        console.error('[Conviso] Failed to load config:', e);
       }
     }
     

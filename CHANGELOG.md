@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2025-11-12
+
+### Changed
+- **Configuration method simplified**: Plugin now only supports Export ENV + app-config.yaml method (removed .env file support)
+- **Error messages updated**: All error messages now reference "environment variable" instead of ".env file"
+- **Code cleanup**: Removed dotenv dependency and manual .env file loading logic
+
+### Removed
+- **Debug logs**: Removed unnecessary console.log debug statements (kept error and warning logs for troubleshooting)
+- **dotenv dependency**: Removed dotenv package as plugin now only uses environment variables with app-config.yaml
+
+### Fixed
+- **Configuration consistency**: All configuration references now consistently use environment variables with app-config.yaml
+- **Error handling**: Improved error handling with silent failures where appropriate
+
 ## [0.1.5] - 2025-11-12
 
 ### Added
@@ -83,6 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+       [0.1.6]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.6
        [0.1.5]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.5
        [0.1.4]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.4
        [0.1.3]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.3

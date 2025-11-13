@@ -17,7 +17,7 @@ export class ConvisoApiService {
 
   async request<T = any>(request: GraphQLRequest): Promise<T> {
     if (!this.config.apiKey) {
-      throw new Error('API Key not configured. Set CONVISO_API_KEY in .env file.');
+      throw new Error('API Key not configured. Set CONVISO_API_KEY as environment variable.');
     }
 
     const url = `${this.config.apiBase}/graphql`;

@@ -20,12 +20,12 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the URL.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the URL.' 
         });
       }
 
       if (!config.apiKey) {
-        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY in .env file.' });
+        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY as environment variable.' });
       }
 
       const assets = await assetService.getImportedAssets(companyId);
@@ -55,12 +55,12 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the request body.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the request body.' 
         });
       }
 
       if (!config.apiKey) {
-        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY in .env file.' });
+        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY as environment variable.' });
       }
 
       const foundNames = assetCacheService.checkNames(companyId, names);
@@ -83,7 +83,7 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the URL.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the URL.' 
         });
       }
 
@@ -112,12 +112,12 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the URL.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the URL.' 
         });
       }
 
       if (!config.apiKey) {
-        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY in .env file.' });
+        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY as environment variable.' });
       }
 
       const result = await assetCacheService.sync(companyId, force);
@@ -146,12 +146,12 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the request body.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the request body.' 
         });
       }
 
       if (!config.apiKey) {
-        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY in .env file.' });
+        return res.status(500).json({ error: 'API Key not configured. Set CONVISO_API_KEY as environment variable.' });
       }
 
       const result = await assetService.importProjects({
@@ -188,7 +188,7 @@ export function createImportRoutes(
 
       if (!companyId) {
         return res.status(400).json({ 
-          error: 'Company ID is required. Set CONVISO_COMPANY_ID in .env file or provide it in the request body.' 
+          error: 'Company ID is required. Set CONVISO_COMPANY_ID as environment variable or provide it in the request body.' 
         });
       }
 

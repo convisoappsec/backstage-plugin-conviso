@@ -39,7 +39,8 @@ export function useImportedAssets(companyId: number | null) {
       }
 
       return new Set(entry.assets);
-    } catch {
+    } catch (error) {
+      console.warn('[useImportedAssets] Failed to read from localStorage cache:', error);
       return null;
     }
   }, [getLocalStorageKey]);

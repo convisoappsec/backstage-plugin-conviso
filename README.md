@@ -67,11 +67,18 @@ backend.add(import('@conviso/backstage-plugin-conviso/backend.js'));
 
 ### 3. Configure the Plugin
 
-The plugin supports two configuration methods. Choose the one that best fits your setup:
+The plugin uses **environment variables with app-config.yaml** for secure configuration.
 
-#### Method 1: Using app-config.yaml (Recommended)
+1. **Export environment variables** in your shell:
 
-Add the Conviso configuration to your `app-config.yaml`:
+```bash
+export CONVISO_API_KEY="your-api-key"
+export CONVISO_COMPANY_ID="your-company-id"
+export CONVISO_ENVIRONMENT="production"  # or "staging" or "local"
+export CONVISO_API_BASE="http://localhost:3000"  # Only if environment is 'local'
+```
+
+2. **Add configuration to `app-config.yaml`** using environment variable substitution:
 
 ```yaml
 # Conviso Platform configuration
@@ -84,61 +91,17 @@ conviso:
 
 **Important:** Always use environment variable substitution (`${VAR}`) in `app-config.yaml` to avoid committing sensitive values to Git. Never hardcode API keys or company IDs directly in the config file.
 
-Then set the environment variables using one of the following options:
-
-**Option A: Using a `.env` file (requires dotenv-cli)**
-
-1. Create a `.env` file in your Backstage root directory:
+3. **Start Backstage:**
 
 ```bash
-# .env
-CONVISO_API_KEY=your-api-key
-CONVISO_COMPANY_ID=your-company-id
-CONVISO_ENVIRONMENT=production  # or "staging" or "local"
-CONVISO_API_BASE=http://localhost:3000  # Only if environment is 'local'
+yarn start
 ```
 
-2. Install `dotenv-cli`:
+**Configuration Priority:**
+1. **Exported environment variables** (highest priority) - `export CONVISO_COMPANY_ID=1028`
+2. **`app-config.yaml`** (Backstage config file with variable substitution)
 
-```bash
-yarn add -D dotenv-cli
-```
-
-3. Update your start script in `package.json`:
-
-```json
-{
-  "scripts": {
-    "start": "dotenv -e .env -- backstage-cli repo start"
-  }
-}
-```
-
-**Option B: Export environment variables directly**
-
-Export the variables in your shell before starting Backstage:
-
-```bash
-export CONVISO_API_KEY="your-api-key"
-export CONVISO_COMPANY_ID="your-company-id"
-export CONVISO_ENVIRONMENT="production"  # or "staging" or "local"
-export CONVISO_API_BASE="http://localhost:3000"  # Only if environment is 'local'
-```
-
-**Note:** Backstage does not automatically load `.env` files. You must either use `dotenv-cli` or export the variables in your shell environment.
-
-#### Method 2: Using Environment Variables Only
-
-If you prefer not to use `app-config.yaml`, the plugin reads directly from environment variables:
-
-```bash
-export CONVISO_API_KEY="your-api-key"
-export CONVISO_COMPANY_ID="your-company-id"
-export CONVISO_ENVIRONMENT="production"  # or "staging" or "local"
-export CONVISO_API_BASE="http://localhost:3000"  # Only if environment is 'local'
-```
-
-**Note:** The plugin reads configuration from `app-config.yaml` first (if configured), then falls back to environment variables for compatibility.
+This ensures sensitive values are never committed to Git and remain secure.
 
 ## Quick Start
 

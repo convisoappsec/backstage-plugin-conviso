@@ -77,7 +77,7 @@ export class AutoImportService {
       const companyId = companyIdFromStore || this.config.companyId;
 
       if (!companyId) {
-        const errorMsg = `No companyId found for instance ${instanceId}. Set CONVISO_COMPANY_ID in .env file.`;
+        const errorMsg = `No companyId found for instance ${instanceId}. Set CONVISO_COMPANY_ID as environment variable.`;
         results.errors.push(errorMsg);
         return results;
       }

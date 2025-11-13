@@ -98,6 +98,7 @@ export interface SyncImportedAssetsResult {
 export interface ConvisoConfigResult {
   environment: string;
   platformUrl: string;
+  companyId?: number;
 }
 
 export interface ConvisoPlatformApi {
@@ -358,9 +359,12 @@ export class ConvisoPlatformApiClient implements ConvisoPlatformApi {
   async getConfig(): Promise<ConvisoConfigResult> {
     const baseUrl = await this.discoveryApi.getBaseUrl('backend');
     const backendBaseUrl = baseUrl.replace('/api/backend', '');
-    const url = `${backendBaseUrl}/api/conviso/config`;
+    // Add cache-busting parameter to force fresh request
+    const url = `${backendBaseUrl}/api/conviso/config?t=${Date.now()}`;
     
-    const response = await this.fetchApi.fetch(url);
+    const response = await this.fetchApi.fetch(url, {
+      cache: 'no-store',
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

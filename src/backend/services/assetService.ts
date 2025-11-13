@@ -128,7 +128,9 @@ export class AssetService {
       });
 
       return importedNames;
-    } catch {
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error('[AssetService] Failed to get imported assets:', errorMsg, error);
       return new Set<string>();
     }
   }
@@ -197,7 +199,12 @@ export class AssetService {
         } else {
           hasMore = false;
         }
-      } catch {
+      } catch (error: unknown) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error('[AssetService] Error fetching page during pagination, stopping', {
+          page,
+          error: errorMsg,
+        });
         break;
       }
     }

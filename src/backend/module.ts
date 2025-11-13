@@ -26,6 +26,14 @@ export const convisoBackendPlugin = createBackendPlugin({
       async init({ httpRouter, catalogApi, auth, logger, config: rootConfig }) {
         const router = express.Router();
         const config = getConvisoConfig(rootConfig);
+        
+        // Log config for debugging
+        logger.info('Conviso config loaded', {
+          companyId: config.companyId,
+          environment: config.environment,
+          apiBase: config.apiBase,
+          hasApiKey: !!config.apiKey,
+        });
 
         router.use(express.json());
 

@@ -1,7 +1,9 @@
 import { ContentHeader, InfoCard, Progress, WarningPanel } from '@backstage/core-components';
+import { useApi } from '@backstage/core-plugin-api';
 import { Button, CircularProgress, Grid, InputAdornment, TextField, Typography } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { convisoPlatformApiRef } from '../../api/convisoPlatformApi';
 import { useAutoImport } from '../../hooks/useAutoImport';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useEntities } from '../../hooks/useEntities';
@@ -23,9 +25,23 @@ interface ProjectSelectorProps {
 
 export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
   const { entities, loading: entitiesLoading, error: entitiesError } = useEntities();
+  const api = useApi(convisoPlatformApiRef);
   
-  const companyIdStr = useMemo(() => localStorage.getItem('conviso_company_id'), []);
-  const companyId = companyIdStr ? parseInt(companyIdStr, 10) : null;
+  const [companyId, setCompanyId] = useState<number | null>(null);
+  
+  useEffect(() => {
+    async function loadCompanyId() {
+      try {
+        const config = await api.getConfig();
+        if (config.companyId) {
+          setCompanyId(config.companyId);
+        }
+      } catch (e) {
+        console.error('[ProjectSelector] Failed to load companyId:', e);
+      }
+    }
+    loadCompanyId();
+  }, [api]);
   
   const {
     importedAssets,
@@ -179,8 +195,8 @@ export const ProjectSelector = ({ onImportSuccess }: ProjectSelectorProps) => {
                 }, 5000);
               } catch (e: unknown) {
                 const errorMsg = e instanceof Error ? e.message : 'Failed to refresh assets';
-                setRefreshSuccess(`Refresh failed: ${errorMsg}. Please try again or check the backend logs.`);
                 console.error('[ProjectSelector] Refresh error:', errorMsg, e);
+                setRefreshSuccess(`Refresh failed: ${errorMsg}. Please try again or check the backend logs.`);
                 setTimeout(() => {
                   setRefreshSuccess(undefined);
                 }, 10000);

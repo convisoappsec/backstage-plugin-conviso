@@ -19,14 +19,16 @@ export function useAutoImport(instanceId: string, companyId?: number) {
           if (result?.integration?.autoImportEnabled !== undefined) {
             setAutoImportEnabled(result.integration.autoImportEnabled);
           }
-        } catch {
+        } catch(e: any) {
+          console.error('[Conviso] Error getting integration:', e);
         }
       }
 
       try {
         const setting = await api.getAutoImport(instanceId);
         setAutoImportEnabled(setting.enabled);
-      } catch {
+      } catch(e: any) {
+        console.error('[Conviso] Error getting auto import:', e);
       }
     };
 
