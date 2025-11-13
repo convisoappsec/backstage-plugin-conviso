@@ -42,12 +42,6 @@ jobs:
       - name: Run tests
         run: yarn test --coverage --watchAll=false
       
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-      
       - name: Build plugin
         run: yarn build
       
