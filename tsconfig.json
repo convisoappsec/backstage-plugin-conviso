@@ -22,17 +22,13 @@
     "isolatedModules": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist-types",
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"],
-      "@/core/*": ["core/*"],
-      "@/infrastructure/*": ["infrastructure/*"],
-      "@/presentation/*": ["presentation/*"],
-      "@/shared/*": ["shared/*"]
-    },
+    "emitDeclarationOnly": true,
+    "outDir": "dist-types",
+    "rootDir": "src",
+    "composite": true,
+    "tsBuildInfoFile": "dist-types/.tsbuildinfo",
+
+    /** JSX config */
     "jsx": "react-jsx",
     "jsxImportSource": "react"
   },
