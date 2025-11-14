@@ -32,6 +32,17 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       
+      - name: Ensure npm version 11.5.1+ for Trusted Publisher
+        run: |
+          npm_version=$(npm --version)
+          echo "Current npm version: $npm_version"
+          # Trusted Publisher requer npm 11.5.1 ou superior
+          # Node.js 20.x vem com npm 10.x, então precisamos atualizar
+          echo "Upgrading npm to latest version for Trusted Publisher support..."
+          npm install -g npm@latest
+          npm --version
+          echo "✅ npm updated for Trusted Publisher (OIDC) support"
+      
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
@@ -89,8 +100,6 @@ jobs:
       
       - name: Publish to npm
         run: npm publish --access public
-        # Usa Trusted Publisher (OIDC) - não precisa de NODE_AUTH_TOKEN
-        # Configure em: https://www.npmjs.com/settings/[usuario]/automation
       
       - name: Extract changelog
         id: changelog
