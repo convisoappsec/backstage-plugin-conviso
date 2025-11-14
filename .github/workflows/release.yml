@@ -119,6 +119,39 @@ jobs:
           echo "✅ dist/ folder was generated correctly by prepack"
           echo "dist/ contents:"
           ls -la dist/ | head -10
+      
+      - name: Determine tag for release
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+            # Remove 'v' prefix if present for version, but keep for tag
+            if [[ ! "$TAG" =~ ^v ]]; then
+              TAG="v$TAG"
+            fi
+          else
+            # Push event - use the tag that triggered the workflow
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "✅ Tag for release: $TAG"
+      
+      - name: Create GitHub Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Release ${{ steps.tag.outputs.tag }}
+          body: |
+            ## Changes in ${{ steps.tag.outputs.tag }}
+            
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details.
+            
+            📦 Published to npm: https://www.npmjs.com/package/@conviso/backstage-plugin-conviso
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
   deploy:
     name: Create GitHub deployment
