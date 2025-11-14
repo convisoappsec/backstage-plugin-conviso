@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.8] - 2025-01-15
+## [0.1.9] - 2025-11-13
+
+### Changed
+- **CI/CD**: Added automatic npm publishing workflow triggered by tag creation
+
+## [0.1.8] - 2025-11-13
 
 ### Added
 - **Visual assets**: Added Conviso logo, screenshots, and demo GIF to README
@@ -15,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Package optimization**: Excluded assets folder from npm package to reduce plugin size
 - **README layout**: Improved README structure with better visual organization
 
-## [0.1.7] - 2025-01-15
+## [0.1.7] - 2025-11-13
 
 ### Added
 - **CI/CD workflows**: Complete CI/CD pipeline setup with automated testing, security scans, and npm publishing
@@ -123,6 +128,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+       [0.1.9]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.9
+       [0.1.8]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.8
+       [0.1.7]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.7
        [0.1.6]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.6
        [0.1.5]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.5
        [0.1.4]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.4
