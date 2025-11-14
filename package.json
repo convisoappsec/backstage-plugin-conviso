@@ -1,6 +1,6 @@
 {
   "name": "@conviso/backstage-plugin-conviso",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Backstage plugin for seamless integration with Conviso Platform. Sync catalog entities as security assets, manage environments, and view security insights.",
   "keywords": [
     "backstage",
@@ -36,11 +36,13 @@
     "test:coverage": "NODE_OPTIONS='--no-deprecation' backstage-cli package test --coverage",
     "test:watch": "NODE_OPTIONS='--no-deprecation' backstage-cli package test --watch",
     "clean": "backstage-cli package clean",
-    "prepack": "yarn tsc && backstage-cli package prepack",
+    "prepack": "yarn build",
     "postpack": "backstage-cli package postpack",
     "type-check": "tsc --noEmit && tsc --noEmit --project tsconfig.backend.json",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "test:release": "bash scripts/test-release.sh",
+    "pack:dry-run": "yarn prepack && npm pack --dry-run"
   },
   "dependencies": {
     "@backstage/catalog-client": "^1.4.0",

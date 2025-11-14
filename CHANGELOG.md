@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] - 2025-01-16
+
+### Fixed
+- **Build process**: Fixed `prepack` script to use `yarn build` instead of `yarn tsc && backstage-cli package prepack`
+- **npm package**: Ensured `dist/` folder with compiled files is included in published package
+- **TypeScript declarations**: Fixed missing `dist/index.d.ts` and `dist/index.esm.js` in npm package
+
+### Changed
+- **CI/CD optimization**: Removed redundant build step from release workflow (prepack handles it automatically)
+- **Workflow efficiency**: Added node_modules cache to reduce GitHub Actions execution time
+- **Validation**: Added verification step to ensure `dist/` folder is generated correctly before publishing
+
 ## [0.1.10] - 2025-11-13
 
 ### Changed
@@ -133,6 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - File-based caching system
 - Full test coverage with Jest and React Testing Library
 
+       [0.1.11]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.11
        [0.1.10]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.10
        [0.1.9]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.9
        [0.1.8]: https://github.com/convisoappsec/backstage-plugin-conviso/releases/tag/v0.1.8
