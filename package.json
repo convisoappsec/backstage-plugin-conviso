@@ -1,6 +1,6 @@
 {
   "name": "@conviso/backstage-plugin-conviso",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Backstage plugin for seamless integration with Conviso Platform. Sync catalog entities as security assets, manage environments, and view security insights.",
   "keywords": [
     "backstage",
