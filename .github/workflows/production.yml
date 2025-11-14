@@ -73,6 +73,7 @@ jobs:
       - security-scan
     permissions:
       contents: write
+      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -140,4 +141,25 @@ jobs:
           git push origin "$TAG"
           
           echo "✅ Tag $TAG created and pushed successfully"
-          echo "🚀 This will trigger the release workflow automatically"
+          
+          # Wait for GitHub to process the tag push
+          echo "⏳ Waiting 10 seconds for GitHub to process tag push..."
+          sleep 10
+          
+          # Trigger release workflow explicitly via API as fallback
+          echo "🚀 Triggering release workflow via API..."
+          WORKFLOW_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/release.yml/dispatches" \
+            -d "{\"ref\":\"main\",\"inputs\":{\"tag\":\"$TAG\"}}")
+          
+          HTTP_CODE=$(echo "$WORKFLOW_RESPONSE" | tail -n1)
+          if [ "$HTTP_CODE" = "204" ]; then
+            echo "✅ Release workflow triggered successfully via API"
+          else
+            echo "⚠️  API call returned HTTP $HTTP_CODE"
+            echo "   The workflow should still trigger automatically from the tag push"
+            echo "   Check: https://github.com/${{ github.repository }}/actions/workflows/release.yml"
+          fi
