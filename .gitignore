@@ -147,6 +147,8 @@ vite.config.ts.timestamp-*
 
 # Types and build artifacts
 dist-types/
+**/*.d.ts
+**/*.d.ts.map
 playwright-report/
 test-results/
 .turbo/
