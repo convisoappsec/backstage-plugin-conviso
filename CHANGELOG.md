@@ -14,11 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GitHub Actions**: Fixed build process to work without full Backstage project structure
 - **Workflow**: Build now happens explicitly in workflow before `npm publish`, ensuring `dist/` is generated correctly
 - **Tests**: Added `react` as devDependency to fix Jest test failures (`Cannot find module 'react'` and `Cannot find module 'react/jsx-runtime'`)
-- **Build process**: Fixed build order - `tsc` now generates `.d.ts` files in `dist-types/src/` BEFORE `backstage-cli package build` runs (required by backstage-cli)
-- **TypeScript config**: Re-added `declaration`, `declarationMap`, `emitDeclarationOnly`, `outDir`, and `rootDir` to `tsconfig.json` to generate declaration files in the correct structure
-- **Build script**: Updated to run `yarn tsc --project tsconfig.json` first to generate `.d.ts` files, then `backstage-cli package build` uses them
 
 ### Changed
+- **Build process**: Simplified to use standard Backstage CLI approach - `backstage-cli package build` now handles everything automatically
+- **TypeScript config**: Simplified `tsconfig.json` to follow Backstage standard - only extends `@backstage/cli/config/tsconfig.json` with minimal overrides (`outDir` and `rootDir`)
+- **Configuration cleanup**: Removed unnecessary `tsconfig.declarations.json` and duplicate configurations - now using single, correct approach as recommended by Backstage
 - **CI/CD optimization**: Build step moved to workflow (before npm publish) instead of relying on prepack
 - **Workflow efficiency**: Added node_modules cache to reduce GitHub Actions execution time
 - **Validation**: Added verification step to ensure `dist/` folder is generated correctly before publishing
