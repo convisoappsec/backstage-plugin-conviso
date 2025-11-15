@@ -123,7 +123,7 @@ describe('useTableSort', () => {
       });
 
       act(() => {
-        result.current.handleSort('value');
+        result.current.handleSort('value' as any);
       });
 
       expect(result.current.sortColumn).toBe('value');
@@ -160,7 +160,7 @@ describe('useTableSort', () => {
       );
 
       act(() => {
-        result.current.handleSort('value');
+        result.current.handleSort('value' as any);
       });
 
       expect(result.current.sortedItems[0].value).toBe(10);
@@ -177,7 +177,7 @@ describe('useTableSort', () => {
       );
 
       act(() => {
-        result.current.handleSort('active');
+        result.current.handleSort('active' as any);
       });
 
       expect(result.current.sortedItems[0].active).toBe(false);
@@ -243,7 +243,7 @@ describe('useTableSort', () => {
       );
 
       act(() => {
-        result.current.handleSort('value');
+        result.current.handleSort('value' as any);
       });
 
       expect(result.current.sortedItems).toHaveLength(2);
@@ -263,7 +263,7 @@ describe('useTableSort', () => {
       );
 
       act(() => {
-        result.current.handleSort('value');
+        result.current.handleSort('value' as any);
       });
 
       expect(result.current.sortedItems[0].name).toBe('Alice');

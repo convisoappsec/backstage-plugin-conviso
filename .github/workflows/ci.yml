@@ -41,3 +41,17 @@ jobs:
       
       - name: Run tests
         run: yarn test --coverage --watchAll=false
+      
+      - name: Build plugin
+        run: |
+          echo "🔨 Building plugin..."
+          yarn build
+          # Verificar se dist/ foi gerado
+          if [ ! -d "dist" ] || [ ! -f "dist/index.esm.js" ] || [ ! -f "dist/index.d.ts" ]; then
+            echo "❌ dist/ folder is missing or incomplete"
+            ls -la dist/ || echo "dist/ does not exist"
+            exit 1
+          fi
+          echo "✅ Build completed successfully"
+          echo "dist/ contents:"
+          ls -la dist/ | head -10
