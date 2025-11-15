@@ -29,7 +29,7 @@
   "sideEffects": false,
   "scripts": {
     "start": "backstage-cli package start",
-    "build": "backstage-cli package build && yarn tsc --project tsconfig.backend.json",
+    "build": "yarn tsc --project tsconfig.json && backstage-cli package build && yarn tsc --project tsconfig.backend.json",
     "lint": "backstage-cli package lint",
     "lint:fix": "backstage-cli package lint --fix",
     "test": "NODE_OPTIONS='--no-deprecation' backstage-cli package test",
