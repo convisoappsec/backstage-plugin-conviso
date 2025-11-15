@@ -1,6 +1,6 @@
 {
   "name": "@conviso/backstage-plugin-conviso",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Backstage plugin for seamless integration with Conviso Platform.",
   "keywords": [
     "backstage",
