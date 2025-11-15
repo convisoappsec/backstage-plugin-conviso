@@ -1,10 +1,13 @@
 {
   "extends": "@backstage/cli/config/tsconfig.json",
-  "include": ["src", "dev"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "outDir": "dist-types",
-    "rootDir": ".",
-    "jsx": "react-jsx"
+    "outDir": "dist-types/src",
+    "rootDir": "src",
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true
   }
 }
