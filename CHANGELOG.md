@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.13] - 2025-01-16
+
+### Fixed
+- **Build process**: Fixed build to work in both local Backstage project and isolated GitHub Actions environment
+- **TypeScript declarations**: Added explicit generation of `.d.ts` files in `dist-types/src/` before `backstage-cli package build` runs
+- **Backend entry point**: Simplified `ensure-backend-types.js` script to only create `backend.js` (tsc already generates other files)
+- **Type checking**: Fixed JSX configuration in `tsconfig.json` to resolve React type errors
+- **Test types**: Fixed type errors in `useTableSort.test.tsx` by adding proper type assertions
+
+### Changed
+- **Build script**: Updated to generate TypeScript declarations before `backstage-cli package build` (required for isolated CI environments)
+- **TypeScript config**: Added `emitDeclarationOnly`, `declaration`, and `declarationMap` to `tsconfig.json` with correct `outDir` and `rootDir` for declaration file generation
+- **Backend script**: Simplified `ensure-backend-types.js` from 60 to 26 lines - now only creates `backend.js` entry point (tsc handles the rest)
+- **Build integration**: Added `ensure-backend-types.js` to build script to ensure `backend.js` is created after backend compilation
+
 ## [0.1.12] - 2025-01-16
 
 ### Fixed
@@ -16,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tests**: Added `react` as devDependency to fix Jest test failures (`Cannot find module 'react'` and `Cannot find module 'react/jsx-runtime'`)
 
 ### Changed
+- **Build process**: Simplified to use standard Backstage CLI approach - `backstage-cli package build` now handles everything automatically
+- **TypeScript config**: Simplified `tsconfig.json` to follow Backstage standard - only extends `@backstage/cli/config/tsconfig.json` with minimal overrides (`outDir` and `rootDir`)
+- **Configuration cleanup**: Removed unnecessary `tsconfig.declarations.json` and duplicate configurations - now using single, correct approach as recommended by Backstage
 - **CI/CD optimization**: Build step moved to workflow (before npm publish) instead of relying on prepack
 - **Workflow efficiency**: Added node_modules cache to reduce GitHub Actions execution time
 - **Validation**: Added verification step to ensure `dist/` folder is generated correctly before publishing
