@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GitHub Actions**: Fixed build process to work without full Backstage project structure
 - **Workflow**: Build now happens explicitly in workflow before `npm publish`, ensuring `dist/` is generated correctly
 - **Tests**: Added `react` as devDependency to fix Jest test failures (`Cannot find module 'react'` and `Cannot find module 'react/jsx-runtime'`)
+- **Build process**: Removed conflicting TypeScript config (`emitDeclarationOnly`, `outDir`, `rootDir`, `composite`) from `tsconfig.json` - `backstage-cli package build` now handles declaration file generation automatically
+- **Build script**: Simplified build script to let `backstage-cli package build` handle TypeScript compilation and declaration generation
 
 ### Changed
 - **CI/CD optimization**: Build step moved to workflow (before npm publish) instead of relying on prepack
